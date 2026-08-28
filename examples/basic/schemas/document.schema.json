@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/locus-md/document.schema.json",
+  "type": "object",
+  "required": [
+    "schema",
+    "id",
+    "title",
+    "type",
+    "status",
+    "owner"
+  ],
+  "properties": {
+    "schema": {
+      "const": "locus.doc.v1"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "index",
+        "plan",
+        "guide",
+        "reference",
+        "policy",
+        "runbook"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "active",
+        "deprecated",
+        "archived"
+      ]
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "created_by": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

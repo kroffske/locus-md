@@ -1,0 +1,6 @@
+- id: locus-md-lint
+  name: locus-md lint
+  entry: locus-md lint
+  language: python
+  pass_filenames: false
+  description: Run static Locus MD documentation checks

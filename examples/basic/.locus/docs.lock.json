@@ -1,0 +1,18 @@
+{
+  "contracts": {
+    "active-milestone": {
+      "block_id": "tasks",
+      "block_kind": "milestone",
+      "body_digest": "sha256:1147138758cc4594a179823becfe1ff866507e30774e82cda4aae14458e95550",
+      "contract_schema": "task-table.v1",
+      "path": "milestones.md",
+      "provider": "tasks",
+      "provider_revision": "sha256:6590126e47e85caa82b2391960358592e462adfffabb8b063e596c09a61a7f3c",
+      "renderer": "task-table.v1",
+      "snapshot_digest": "sha256:319386623170aa5fab5e26f3ecbbe40a7172745daeaa2c7dc1c78b0b32ec244b",
+      "surface": "docs",
+      "synced_at": "2026-08-27T23:12:32Z"
+    }
+  },
+  "schema": "locus-md.lock.v1"
+}

@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.locus-md.dev/finding.v1.schema.json",
+  "title": "Locus MD Finding v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "code",
+    "severity",
+    "message",
+    "state"
+  ],
+  "properties": {
+    "schema": {
+      "const": "locus-md.finding.v1"
+    },
+    "code": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Z0-9-]+$"
+    },
+    "severity": {
+      "enum": [
+        "info",
+        "warning",
+        "error",
+        "fatal"
+      ]
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "state": {
+      "enum": [
+        "passed",
+        "failed",
+        "unverified",
+        "skipped",
+        "configuration-error",
+        "internal-error"
+      ]
+    },
+    "surface": {
+      "type": "string"
+    },
+    "path": {
+      "type": "string"
+    },
+    "range": {
+      "type": "object",
+      "properties": {
+        "start": {
+          "$ref": "#/$defs/position"
+        },
+        "end": {
+          "$ref": "#/$defs/position"
+        }
+      },
+      "required": [
+        "start"
+      ],
+      "additionalProperties": false
+    },
+    "contract_id": {
+      "type": "string"
+    },
+    "provider": {
+      "type": "string"
+    },
+    "help": {
+      "type": "string"
+    },
+    "data": {
+      "type": "object"
+    },
+    "remediation": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "command",
+            "config",
+            "manual"
+          ]
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "value"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "position": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "column": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "line",
+        "column"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

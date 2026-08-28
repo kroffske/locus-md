@@ -1,0 +1,38 @@
+{
+  "schema": "locus-md.entities.v1",
+  "records": [
+    {
+      "kind": "task",
+      "id": "T-101",
+      "revision": "7",
+      "fields": {
+        "title": "Create repository skeleton",
+        "status": "done",
+        "milestone": "m01"
+      },
+      "url": null
+    },
+    {
+      "kind": "task",
+      "id": "T-102",
+      "revision": "3",
+      "fields": {
+        "title": "Implement marker parser",
+        "status": "doing",
+        "milestone": "m01"
+      },
+      "url": null
+    },
+    {
+      "kind": "task",
+      "id": "T-103",
+      "revision": "1",
+      "fields": {
+        "title": "Add file provider",
+        "status": "open",
+        "milestone": "m01"
+      },
+      "url": null
+    }
+  ]
+}

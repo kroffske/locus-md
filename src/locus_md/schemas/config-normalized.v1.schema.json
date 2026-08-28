@@ -1,0 +1,199 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.locus-md.dev/config-normalized.v1.schema.json",
+  "title": "Locus MD Normalized Config v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "surfaces",
+    "providers",
+    "contracts"
+  ],
+  "properties": {
+    "schema": {
+      "const": "locus-md.config.v1"
+    },
+    "strict": {
+      "type": "boolean"
+    },
+    "lock_file": {
+      "type": "string"
+    },
+    "cache_dir": {
+      "type": "string"
+    },
+    "network": {
+      "enum": [
+        "deny",
+        "explicit",
+        "allow"
+      ]
+    },
+    "unverified": {
+      "enum": [
+        "fail",
+        "warn",
+        "ignore"
+      ]
+    },
+    "surfaces": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "root",
+          "include"
+        ],
+        "properties": {
+          "root": {
+            "type": "string"
+          },
+          "include": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "exclude": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "index": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "frontmatter": {
+            "enum": [
+              "required",
+              "optional",
+              "forbidden"
+            ]
+          },
+          "frontmatter_schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "require_reachable": {
+            "type": "boolean"
+          },
+          "follow_symlinks": {
+            "type": "boolean"
+          },
+          "default_provider": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "providers": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "adapter",
+          "options"
+        ],
+        "properties": {
+          "adapter": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "network": {
+            "type": "boolean"
+          },
+          "snapshot_file": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "options": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "contracts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "surface",
+          "path",
+          "block_kind",
+          "block_id",
+          "schema",
+          "mode"
+        ],
+        "properties": {
+          "surface": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "block_kind": {
+            "type": "string"
+          },
+          "block_id": {
+            "type": "string"
+          },
+          "schema": {
+            "type": "string"
+          },
+          "mode": {
+            "enum": [
+              "authored",
+              "projection",
+              "snapshot"
+            ]
+          },
+          "provider": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "selector": {
+            "type": "object"
+          },
+          "renderer": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "severity": {
+            "enum": [
+              "info",
+              "warning",
+              "error",
+              "fatal"
+            ]
+          },
+          "required": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.locus-md.dev/provider-snapshot.v1.schema.json",
+  "title": "Locus MD Provider Snapshot v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "provider",
+    "adapter",
+    "adapter_version",
+    "revision",
+    "consistency",
+    "captured_at",
+    "records",
+    "content_digest"
+  ],
+  "properties": {
+    "schema": {
+      "const": "locus-md.snapshot.v1"
+    },
+    "provider": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adapter": {
+      "type": "string",
+      "minLength": 1
+    },
+    "adapter_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "revision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "consistency": {
+      "enum": [
+        "atomic",
+        "best-effort",
+        "local",
+        "cached"
+      ]
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "content_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "id",
+          "fields"
+        ],
+        "properties": {
+          "kind": {
+            "type": "string",
+            "minLength": 1
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "revision": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fields": {
+            "type": "object"
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

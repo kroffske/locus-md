@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.locus-md.dev/report.v1.schema.json",
+  "title": "Locus MD Report v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "run_id",
+    "mode",
+    "state",
+    "config_digest",
+    "findings"
+  ],
+  "properties": {
+    "schema": {
+      "const": "locus-md.report.v1"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mode": {
+      "enum": [
+        "config",
+        "lint",
+        "verify",
+        "sync-check",
+        "sync-write",
+        "doctor"
+      ]
+    },
+    "state": {
+      "enum": [
+        "passed",
+        "failed",
+        "unverified",
+        "configuration-error",
+        "internal-error"
+      ]
+    },
+    "config_digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "snapshots": {
+      "type": "object"
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "finding.v1.schema.json"
+      }
+    },
+    "patches": {
+      "type": "array"
+    }
+  },
+  "additionalProperties": false
+}

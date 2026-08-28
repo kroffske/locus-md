@@ -1,0 +1,45 @@
+{
+  "adapter": "file-json",
+  "adapter_version": "0.1.0",
+  "captured_at": "2026-08-27T23:14:40Z",
+  "consistency": "local",
+  "content_digest": "sha256:319386623170aa5fab5e26f3ecbbe40a7172745daeaa2c7dc1c78b0b32ec244b",
+  "provider": "tasks",
+  "records": [
+    {
+      "fields": {
+        "milestone": "m01",
+        "status": "done",
+        "title": "Create repository skeleton"
+      },
+      "id": "T-101",
+      "kind": "task",
+      "revision": "7",
+      "url": null
+    },
+    {
+      "fields": {
+        "milestone": "m01",
+        "status": "doing",
+        "title": "Implement marker parser"
+      },
+      "id": "T-102",
+      "kind": "task",
+      "revision": "3",
+      "url": null
+    },
+    {
+      "fields": {
+        "milestone": "m01",
+        "status": "open",
+        "title": "Add file provider"
+      },
+      "id": "T-103",
+      "kind": "task",
+      "revision": "1",
+      "url": null
+    }
+  ],
+  "revision": "sha256:6590126e47e85caa82b2391960358592e462adfffabb8b063e596c09a61a7f3c",
+  "schema": "locus-md.snapshot.v1"
+}

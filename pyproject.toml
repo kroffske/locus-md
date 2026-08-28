@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=77", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "locus-md"
+version = "0.1.0"
+description = "Semantic documentation contracts for Markdown repositories"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "Locus MD contributors"}]
+keywords = ["markdown", "documentation", "linter", "contracts", "docs-as-code"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Documentation",
+  "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = ["PyYAML>=6.0", "jsonschema>=4.20", "markdown-it-py>=3.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+locus-md = "locus_md.cli:main"
+
+[project.entry-points."locus_md.providers"]
+file-json = "locus_md.providers.file_json:FileJsonProvider"
+snapshot = "locus_md.providers.snapshot:SnapshotProvider"
+
+[project.entry-points."locus_md.contracts"]
+"task-table.v1" = "locus_md.contracts.task_table:TaskTableHandler"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+locus_md = ["py.typed", "schemas/*.json"]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]

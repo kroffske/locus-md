@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.locus-md.dev/lock.v1.schema.json",
+  "title": "Locus MD Lock v1",
+  "type": "object",
+  "required": [
+    "schema",
+    "contracts"
+  ],
+  "properties": {
+    "schema": {
+      "const": "locus-md.lock.v1"
+    },
+    "contracts": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "surface",
+          "path",
+          "block_kind",
+          "block_id",
+          "contract_schema",
+          "renderer",
+          "provider",
+          "provider_revision",
+          "snapshot_digest",
+          "body_digest",
+          "synced_at"
+        ],
+        "properties": {
+          "surface": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "block_kind": {
+            "type": "string"
+          },
+          "block_id": {
+            "type": "string"
+          },
+          "contract_schema": {
+            "type": "string"
+          },
+          "renderer": {
+            "type": "string"
+          },
+          "provider": {
+            "type": "string"
+          },
+          "provider_revision": {
+            "type": "string"
+          },
+          "snapshot_digest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "body_digest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "synced_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
