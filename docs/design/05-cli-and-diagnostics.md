@@ -9,14 +9,15 @@ tags: [cli, diagnostics]
 updated: "2026-08-28T00:27:14Z"
 source_commit: "6ecd7cfe5fd1"
 update_event: "user_request"
-description: "Проверено и подключено к навигации и dogfood-контракту Locus MD."
+description: "Validated and connected to Locus MD navigation and self-validation contracts."
 ---
 
-# 1. Командная модель
+# 1. Command model
 
 ## `locus.md init`
 
-Создаёт или добавляет namespaced config scaffold.
+Creates a new namespaced configuration scaffold or adds missing documentation
+sections.
 
 ```bash
 locus.md init
@@ -26,27 +27,27 @@ locus.md init --print
 
 ## `locus.md config validate`
 
-Проверяет discovery, namespace, types, paths и plugin references.
+Validates discovery, namespace isolation, types, paths, and plugin references.
 
 ```bash
 locus.md config validate
-locus.md config show --normalized
+locus.md config show
 ```
 
-`show` не выводит secret-like values.
+`config show` returns the normalized Locus MD model and excludes unrelated INI
+sections.
 
 ## `locus.md lint`
 
-Только static checks:
+Runs static checks only:
 
-- config binding coverage;
-- frontmatter;
-- links;
-- reachability;
+- contract-binding coverage;
+- frontmatter schemas;
+- links and reachability;
 - marker grammar;
 - lock/body drift.
 
-Не открывает network providers.
+It never opens a network provider.
 
 ```bash
 locus.md lint
@@ -56,7 +57,7 @@ locus.md lint --format json
 
 ## `locus.md verify`
 
-Добавляет provider assertions.
+Adds provider-backed assertions.
 
 ```bash
 locus.md verify
@@ -64,49 +65,51 @@ locus.md verify --offline
 locus.md verify --provider tasks
 ```
 
-`--provider` фильтрует contracts, но не заменяет provider в config.
+`--provider` filters contracts. It never changes the provider declared in
+configuration.
 
 ## `locus.md sync --check`
 
-Строит canonical projections без writes.
+Builds canonical projections without writing.
 
 ```bash
-locus.md sync --check
+locus.md sync --check --offline
 ```
 
-Human output показывает summary и unified diff; JSON содержит patches.
+Human output includes a summary and unified diff. JSON output includes patches.
 
 ## `locus.md sync --write`
 
-Применяет deterministic patches и обновляет lock.
+Applies deterministic patches and updates lock evidence.
 
 ```bash
-locus.md sync --write
+locus.md sync --write --offline
 ```
 
-Без `--write` команда не модифицирует workspace.
+No sync command writes unless `--write` is present.
 
 ## `locus.md contracts list`
 
-Показывает configured bindings, найденные blocks, providers, schema/renderer, state и lock status.
+Lists configured bindings, discovered blocks, providers, schema and renderer,
+and lock state.
 
 ## `locus.md doctor`
 
-Проверяет environment, plugin versions, writable paths, Git state, network policy и availability authentication. Doctor не является validation gate.
+Reports Python, platform, selected configuration, workspace, writability,
+provider plugins, contract plugins, and plugin-load errors. It is an environment
+diagnostic, not a validation gate.
 
 # 2. Output formats
 
-## Human
+Human example:
 
 ```text
-ERROR DOC-BLOCK-OUT-OF-DATE docs/milestones.md:14
-  Contract active-milestone differs from provider snapshot tasks@rev-42.
+ERROR DOC-BLOCK-021 docs/milestones.md:14
+  Projection differs from the current provider snapshot.
   Run: locus.md sync --check
 ```
 
-## JSON
-
-Схема: `schemas/finding.v1.schema.json`.
+JSON reports follow the packaged `report.v1.schema.json`:
 
 ```json
 {
@@ -121,11 +124,12 @@ ERROR DOC-BLOCK-OUT-OF-DATE docs/milestones.md:14
 }
 ```
 
-## SARIF
+SARIF may be added after the finding schema stabilizes. Finding-code to rule-ID
+mapping must remain stable.
 
-Добавляется после стабилизации finding schema. Mapping code → rule ID сохраняется.
+# 3. Severity and state
 
-# 3. Severity
+Severities:
 
 ```text
 info
@@ -134,11 +138,10 @@ error
 fatal
 ```
 
-Severity и verification state — разные измерения.
+Severity and verification state are separate. A required unavailable provider
+may produce `state=unverified` and error severity in CI.
 
-Provider outage может иметь `state=unverified` и `severity=error` в CI, но warning локально.
-
-# 4. Rule code taxonomy
+# 4. Finding-code taxonomy
 
 ```text
 CFG-*       configuration
@@ -148,7 +151,7 @@ DOC-BLOCK-* managed blocks
 DOC-LOCK-*  lock state
 PROV-*      provider
 CONTRACT-*  contract handler
-SYNC-*      patch/write
+SYNC-*      patch and write
 PLUGIN-*    plugin loading
 INTERNAL-*  unexpected failure
 ```
@@ -163,25 +166,26 @@ DOC-BLOCK-010 unbound block
 DOC-BLOCK-011 missing required block
 DOC-BLOCK-020 manual drift
 DOC-BLOCK-021 out-of-date projection
-PROV-001 unavailable
-PROV-002 partial snapshot
-PROV-003 unsupported capability
+PROV-001 unavailable provider
+PROV-010 invalid built-in provider options
+CONTRACT-001 missing required entity field
+CONTRACT-002 renderer failure
+PLUGIN-001 unsupported plugin API version
+PLUGIN-002 duplicate plugin registration
 SYNC-001 source file changed
-SYNC-002 overlapping patches
+SYNC-010 safe patches applied
 ```
 
 # 5. Exit codes
 
 | Code | Meaning |
 |---:|---|
-| `0` | Requested verification passed |
-| `1` | Findings at or above failure threshold |
-| `2` | Usage/configuration error |
-| `3` | Required assertions remained unverified |
+| `0` | Requested validation passed |
+| `1` | Findings reached the failure threshold or sync requires a patch |
+| `2` | Usage or configuration error |
+| `3` | Required assertions remain unverified |
 | `4` | Write conflict or unsafe rewrite refusal |
 | `5` | Internal error |
-
-`sync --check` использует `1`, если patch required.
 
 # 6. Aggregate result
 
@@ -193,11 +197,9 @@ internal-error
 > passed
 ```
 
-`skipped` не повышает aggregate state, если skip разрешён.
-
 # 7. CI recipes
 
-## Basic offline
+Offline validation:
 
 ```bash
 locus.md config validate
@@ -206,41 +208,29 @@ locus.md verify --offline
 locus.md sync --check --offline
 ```
 
-## Network-enabled
+Network-enabled validation:
 
 ```bash
 locus.md verify --network
 locus.md sync --check --network
 ```
 
-Network разрешается явно при `network=explicit`.
-
-## Changed files
-
-Post-MVP:
-
-```bash
-locus.md lint --changed origin/main
-```
-
-Graph dependencies расширяют affected set за пределы изменённых файлов.
+Network access must be explicitly permitted when `network=explicit`.
 
 # 8. Pre-commit
 
-Recommended hook:
-
 ```yaml
-- repo: https://github.com/example/locus-md
+- repo: https://example.invalid/locus-md
   rev: v0.1.1
   hooks:
     - id: locus-md-lint
 ```
 
-Pre-commit запускает static lint. Provider verification обычно остаётся в CI.
+Pre-commit runs static lint. Provider verification normally remains in CI.
 
 # 9. LLM remediation
 
-Finding может включать:
+A finding may include deterministic remediation:
 
 ```json
 {
@@ -251,4 +241,5 @@ Finding может включать:
 }
 ```
 
-LLM может объяснить finding, предложить config change или подготовить patch. Engine не принимает free-form LLM answer как evidence.
+An LLM may explain a finding or propose a change. Free-form model output never
+counts as validation evidence.

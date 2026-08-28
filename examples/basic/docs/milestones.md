@@ -11,7 +11,7 @@ created_by: "example"
 
 # Milestone m01
 
-Цель milestone описывается человеком и не генерируется из task tracker.
+The milestone goal is authored prose and is not generated from a task tracker.
 
 ## Tasks
 
@@ -25,4 +25,4 @@ created_by: "example"
 
 ## Notes
 
-Здесь человек или LLM может вести rationale, риски и решения. `locus.md sync` не меняет этот раздел.
+An author or LLM can record rationale, risks, and decisions here. `locus.md sync` does not change this section.

@@ -9,56 +9,60 @@ tags: [product, overview]
 updated: "2026-08-28T00:27:14Z"
 source_commit: "6ecd7cfe5fd1"
 update_event: "user_request"
-description: "Проверено и подключено к навигации и dogfood-контракту Locus MD."
+description: "Validated and connected to Locus MD navigation and self-validation contracts."
 ---
 
-# 1. Продуктовое решение
+# 1. Product decision
 
-Создать самостоятельный open-source или internal-shared репозиторий **`locus-md`**, который устанавливается и запускается без Locus.
+Locus MD is a standalone package that installs and runs without another host
+application.
 
-Продуктовая формула:
+> Locus MD validates not only Markdown form, but also whether declared document
+> projections match their data sources. Authored text outside managed regions
+> remains unchanged.
 
-> Locus MD проверяет не только форму Markdown, но и соответствие документальных проекций объявленным источникам данных, сохраняя весь неуправляемый текст без изменений.
-
-Инструмент занимает слой между обычным Markdown linting и предметными системами:
+The tool occupies the layer between ordinary Markdown validation and domain
+systems:
 
 ```text
 Markdown style / prose / links
                 ↓
        Locus MD contracts
                 ↓
-files / JSON / Git / Locus / GitHub / Linear / custom providers
+files / JSON / Git / remote trackers / custom providers
 ```
 
-# 2. Почему отдельный репозиторий оправдан
+# 2. Why a standalone package
 
-Первый подтверждённый host — Locus, но целевой consumer set шире:
+The target users are broader than one host application:
 
-- коллеги, которым нужен воспроизводимый documentation gate без установки Locus;
-- другие CLI и build systems;
-- репозитории, где source of truth хранится в JSON/YAML/GitHub/Linear;
-- pre-commit и CI;
-- LLM-агенты, которым нужна безопасная граница между authored и machine-owned содержимым.
+- teams that need a reproducible documentation gate;
+- other CLIs and build systems;
+- repositories whose source of truth lives in JSON, YAML, Git, or remote services;
+- pre-commit and CI environments;
+- LLM agents that need a safe boundary between authored and machine-owned content.
 
-Поэтому ядро не должно знать о структуре `locus-skills`, `.tasks`, конкретном tracker или внутреннем config runtime.
+The core therefore knows nothing about a host repository layout, a specific
+task store, a particular tracker, or a host configuration runtime.
 
-# 3. Главные архитектурные решения
+# 3. Main architecture decisions
 
 ## 3.1. Config-driven surfaces
 
-В коде нет обязательного `docs/`, `docs/index.md` или конкретного frontmatter enum. Репозиторий объявляет одну или несколько поверхностей:
+The core does not require `docs/`, `docs/index.md`, or a fixed frontmatter enum.
+A repository declares one or more surfaces:
 
 ```text
 surface = root + include/exclude + index + envelope rules + graph rules
 ```
 
-Это позволяет проверять `docs/`, `handbook/`, `adr/`, `runbooks/`, набор README по monorepo или отдельные contract-файлы.
+This supports `docs/`, `handbook/`, `adr/`, `runbooks/`, monorepo README sets,
+or individual contract files.
 
-## 3.2. Один общий INI-файл
+## 3.2. One shared INI file
 
-Базовый путь — `.locus/config.ini`, но путь можно передать через `--config`.
-
-Locus MD читает только:
+The default path is `.locus/config.ini`; `--config` accepts another path.
+Locus MD reads only these namespaces:
 
 ```text
 [locus.docs]
@@ -68,11 +72,11 @@ Locus MD читает только:
 [locus.docs.rule:*]
 ```
 
-Другие секции не интерпретируются и не участвуют в interpolation.
+Unrelated sections are neither interpreted nor interpolated.
 
-## 3.3. Короткий Markdown, подробный конфиг
+## 3.3. Short Markdown, detailed configuration
 
-Маркеры содержат только понятный минимум:
+Markers contain only local identity:
 
 ```md
 <!-- locus:milestone tasks begin -->
@@ -80,64 +84,69 @@ Locus MD читает только:
 <!-- locus:milestone tasks end -->
 ```
 
-Вся семантика находится в конфиге:
+Configuration carries the semantics:
 
 ```text
 path + block_kind + block_id
 → schema + mode + provider + selector + renderer
 ```
 
-## 3.4. Sidecar lock вместо тяжёлых markers
+## 3.4. Sidecar lock
 
-`.locus/docs.lock.json` хранит digest тела блока, digest provider snapshot, source revision, renderer, contract schema и момент последней успешной синхронизации.
-
-Это позволяет обнаружить ручной drift даже без сети и не увеличивает нагрузку на человека или LLM.
+`.locus/docs.lock.json` records the managed-body digest, provider-snapshot
+digest, source revision, renderer, contract schema, and last successful
+materialization. It detects manual drift without expanding the marker syntax.
 
 ## 3.5. Snapshot consistency
 
-Сначала engine строит полный query plan, затем каждый provider захватывает один immutable snapshot на запуск. Все блоки одного provider проверяются против одной ревизии.
+The engine builds the full query plan before provider I/O. Each provider then
+captures one immutable snapshot for the run. All contracts for that provider
+see the same revision.
 
-## 3.6. Однонаправленная интеграция
+## 3.6. One-way integration
 
 ```text
 locus-md core
       ↑
 optional provider plugins
       ↑
-Locus host adapter
+host adapter
 ```
 
-`locus-md` никогда не импортирует Locus. Locus либо вызывает public Python API, регистрирует host providers, либо запускает standalone CLI как subprocess.
+The core never imports a host application. A host may call the public Python
+API, register providers, or run `locus.md` as a subprocess.
 
-# 4. MVP
+# 4. First release boundary
 
-MVP включает:
+Included:
 
-- namespaced INI loader;
-- несколько configurable surfaces;
-- YAML frontmatter + JSON Schema;
-- Markdown scanning и repository graph;
-- короткие managed block markers;
-- config bindings;
-- `file-json` provider;
+- namespaced INI loading;
+- configurable documentation surfaces;
+- YAML frontmatter with JSON Schema;
+- Markdown scanning and repository graphs;
+- short managed-block markers and config bindings;
+- `file-json` and snapshot providers;
 - immutable snapshots;
-- `lint`, `verify`, `sync --check`, `sync --write`;
-- lock-file;
-- JSON diagnostics;
-- provider/plugin API;
-- Locus adapter как отдельный integration package или host module.
+- `lint`, `verify`, `sync --check`, and `sync --write`;
+- lock evidence and JSON diagnostics;
+- provider and contract plugin APIs.
 
-MVP не включает remote writes, bidirectional sync, LLM-mediated pass/fail, собственную систему версионирования, language server или полный prose/style linter.
+Excluded:
 
-# 5. Критерий готовности
+- remote writes and bidirectional sync;
+- LLM-mediated pass/fail decisions;
+- a custom version-control system;
+- a language server;
+- a general prose or style linter.
 
-1. Чистый checkout воспроизводит `lint`, `verify` и `sync --check`.
-2. Один и тот же config + snapshot дают одинаковые findings и rendered block.
-3. `sync --write` не меняет ни одного байта вне managed spans.
-4. Повторный sync является no-op.
-5. Ручное изменение projection обнаруживается через lock или повторный render.
-6. Недоступный provider даёт `unverified`, а не ложный `passed`.
-7. Неизвестный schema/provider/renderer даёт понятную configuration error.
-8. В одном документе безопасно сосуществуют блоки разных providers.
-9. Standalone CLI не требует Locus.
-10. `locus docs` использует то же ядро и тот же `[locus.docs]` config.
+# 5. Acceptance criteria
+
+1. A clean checkout reproduces `lint`, `verify`, and `sync --check`.
+2. The same configuration and snapshot produce the same findings and rendered block.
+3. `sync --write` changes no bytes outside managed spans.
+4. Repeated sync is a no-op.
+5. Lock evidence or a fresh render detects manual projection edits.
+6. An unavailable required provider produces `unverified`, never a false pass.
+7. Unknown schemas, providers, and renderers produce clear configuration errors.
+8. Contracts backed by different providers can coexist in one document.
+9. The standalone CLI has no host-runtime dependency.

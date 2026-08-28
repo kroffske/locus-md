@@ -9,19 +9,14 @@ tags: [providers, plugins, api]
 updated: "2026-08-28T00:27:14Z"
 source_commit: "6ecd7cfe5fd1"
 update_event: "user_request"
-description: "Проверено и подключено к навигации и dogfood-контракту Locus MD."
+description: "Validated and connected to Locus MD navigation and self-validation contracts."
 ---
 
-# 1. Цель abstraction
+# 1. Provider responsibility
 
-Provider adapter отвечает только за получение и нормализацию данных. Он не:
-
-- парсит Markdown;
-- выбирает contract;
-- рендерит block;
-- изменяет remote source;
-- читает unrelated INI sections;
-- определяет aggregate pass/fail.
+A provider adapter only obtains and normalizes data. It never parses Markdown,
+chooses a contract, renders a block, mutates a remote source, reads unrelated
+INI sections, or decides aggregate pass or fail.
 
 # 2. Plugin groups
 
@@ -30,15 +25,14 @@ Python entry points:
 ```text
 locus_md.providers
 locus_md.contracts
-locus_md.renderers
-locus_md.rules
 ```
 
-Пример:
+Renderer and rule entry-point groups are deferred. Renderers are currently
+owned by a contract handler, while a declared rule is rejected with `CFG-037`.
 
 ```toml
 [project.entry-points."locus_md.providers"]
-github-issues = "locus_md_github:GitHubIssuesProvider"
+example-issues = "example_plugin:IssuesProvider"
 ```
 
 # 3. Provider lifecycle
@@ -52,26 +46,36 @@ load class
 → close session
 ```
 
-Один provider plugin может обслуживать несколько configured provider names.
+One plugin may serve multiple configured provider names.
 
 # 4. Interfaces
 
 ```python
 class ProviderPlugin(Protocol):
+    api_version: str
     plugin_id: str
     plugin_version: str
 
     def validate_config(self, options: Mapping[str, str]) -> list[Finding]: ...
-    def open(self, context: ProviderContext, options: Mapping[str, str]) -> ProviderSession: ...
+    def open(
+        self,
+        context: ProviderContext,
+        options: Mapping[str, str],
+    ) -> ProviderSession: ...
+
 
 class ProviderSession(Protocol):
     capabilities: frozenset[str]
 
-    def capture(self, queries: Sequence[ProviderQuery]) -> ProviderSnapshot: ...
+    def capture(
+        self,
+        queries: Sequence[ProviderQuery],
+    ) -> ProviderSnapshot: ...
     def close(self) -> None: ...
 ```
 
-`capture` предпочтительно batch. Если remote API не даёт atomic snapshot, adapter сообщает `consistency=best-effort`.
+`capture` should batch queries. If a remote service cannot provide an atomic
+snapshot, the adapter reports `consistency=best-effort`.
 
 # 5. Query model
 
@@ -86,18 +90,18 @@ class ProviderSession(Protocol):
 }
 ```
 
-Core canonicalizes key order, set-like lists и field sets.
+The core canonicalizes key order, set-like lists, and field sets.
 
 # 6. Snapshot model
 
-Схема: `schemas/provider-snapshot.v1.schema.json`.
+The packaged `provider-snapshot.v1.schema.json` defines the format.
 
 ```json
 {
   "schema": "locus-md.snapshot.v1",
   "provider": "tasks",
   "adapter": "file-json",
-  "adapter_version": "0.1.0",
+  "adapter_version": "0.1.1",
   "revision": "sha256:...",
   "consistency": "local",
   "captured_at": "2026-08-27T08:00:00Z",
@@ -106,11 +110,11 @@ Core canonicalizes key order, set-like lists и field sets.
 }
 ```
 
-`content_digest` пересчитывается core. Plugin-provided digest не считается trusted.
+The core recomputes `content_digest`; a plugin-provided digest is untrusted.
 
 # 7. Capabilities
 
-Initial:
+Initial capabilities:
 
 ```text
 resolve
@@ -122,74 +126,65 @@ atomic-snapshot
 urls
 ```
 
-Handler объявляет required capabilities. Planning завершается до provider call, если capability отсутствует.
+A handler declares required capabilities. Planning fails before provider I/O
+when a required capability is absent.
 
 # 8. Built-in providers
 
-MVP:
+The first release includes `file-json` and `snapshot`. File-based YAML and CSV
+providers are optional later additions. Remote service SDKs do not belong in
+the core distribution.
 
-- `file-json`;
-- `snapshot`;
-- optional `git` для commits/tracked paths.
+# 9. Injected providers
 
-Post-MVP convenience:
+An embedding application may register a runtime provider factory through the
+public plugin registry. Standalone mode uses configured plugins or snapshots.
+If neither exists, it returns `PROV-001` instead of importing an application at
+runtime.
 
-- `file-yaml`;
-- `file-csv`.
-
-Core distribution не включает SDK remote trackers.
-
-# 9. Optional packages
-
-```text
-locus-md-locus
-locus-md-github
-locus-md-linear
-```
-
-Remote writes не входят в provider protocol v1.
-
-# 10. Host-injected providers
-
-Host регистрирует runtime object:
-
-```python
-host_services.providers.register("workflow", provider_session_factory)
-```
-
-Config:
-
-```ini
-[locus.docs.provider:workflow]
-adapter = host
-name = workflow
-snapshot_file = .locus/snapshots/workflow.json
-```
-
-Standalone mode использует snapshot либо возвращает clear `PROV-001`, не пытаясь импортировать Locus.
-
-# 11. Contract handlers
+# 10. Contract handlers
 
 ```python
 class ContractHandler(Protocol):
+    api_version: str
     schema_id: str
+    renderer_ids: frozenset[str]
+    required_capabilities: frozenset[str]
 
-    def parse(self, block: ManagedBlock) -> ContractDocument: ...
-    def plan(self, binding: ContractBinding, document: ContractDocument) -> list[ProviderQuery]: ...
-    def validate(self, binding: ContractBinding, document: ContractDocument, snapshot: ProviderSnapshot) -> list[Finding]: ...
-    def render(self, binding: ContractBinding, snapshot: ProviderSnapshot) -> str: ...
+    def plan(
+        self,
+        binding: ContractBinding,
+        document: DocumentRecord,
+        block: ManagedBlock,
+    ) -> list[ProviderQuery]: ...
+    def validate(
+        self,
+        binding: ContractBinding,
+        document: DocumentRecord,
+        block: ManagedBlock,
+        snapshot: ProviderSnapshot,
+    ) -> list[Finding]: ...
+    def render(
+        self,
+        binding: ContractBinding,
+        snapshot: ProviderSnapshot,
+        newline: str,
+    ) -> str: ...
 ```
 
-`render` доступен только projection/snapshot handlers.
+Only projection and snapshot handlers render replacements.
 
-# 12. Renderer separation
+# 11. Renderer separation
 
-Renderer не читает provider, не пишет файл, не добавляет nondeterministic values и не зависит от locale/time без explicit input.
+In `0.1.1`, a contract handler advertises its `renderer_ids` and performs the
+render. Rendering never opens a provider, writes files, adds nondeterministic
+values, or depends on locale and time without explicit input. A separate
+renderer plugin group may be added after this boundary is proven by more than
+one contract schema.
 
-# 13. Plugin trust and compatibility
+# 12. Trust and compatibility
 
-- Plugins исполняются in-process и считаются trusted code.
-- JSON report содержит plugin IDs/versions.
-- Major API version проверяется до execution.
-- Contract test kit публикуется вместе с core.
-- Official plugins проходят determinism и failure-injection tests.
+- Plugins run in-process and are trusted executable code.
+- JSON reports include plugin identifiers and versions.
+- `api_version = "1"` is checked before registration or execution.
+- A shared third-party contract test kit remains planned rather than shipped.

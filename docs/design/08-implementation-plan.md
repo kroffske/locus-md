@@ -9,107 +9,108 @@ tags: [plan, roadmap]
 updated: "2026-08-28T00:27:14Z"
 source_commit: "6ecd7cfe5fd1"
 update_event: "user_request"
-description: "Проверено и подключено к навигации и dogfood-контракту Locus MD."
+description: "Validated and connected to Locus MD navigation and self-validation contracts."
 ---
 
 # 1. Delivery strategy
 
-Разработка идёт вертикальными slices. Каждый milestone заканчивается runnable CLI и acceptance test, а не только внутренними abstractions.
+Development proceeds in vertical slices. Each milestone ends with a runnable
+standalone CLI and an acceptance test, not only internal abstractions.
 
 # 2. Milestone M0 — repository and contract baseline
 
 ## Goal
 
-Создать самостоятельный repository и зафиксировать public boundaries.
+Create a standalone repository and fix the public boundaries.
 
 ## Work items
 
 | ID | Task | Depends on |
 |---|---|---|
-| MD-001 | Repository skeleton, license, contribution policy | — |
-| MD-002 | Product naming и package mapping | MD-001 |
-| MD-003 | ADR по shared INI namespace | MD-002 |
-| MD-004 | Public config/finding/snapshot schemas | MD-003 |
-| MD-005 | CI, type checking, tests, package build | MD-001 |
-| MD-006 | Example workspace | MD-004 |
+| MD-001 | Repository skeleton, license, and contribution policy | — |
+| MD-002 | Product naming and package mapping | MD-001 |
+| MD-003 | Shared INI namespace decision | MD-002 |
+| MD-004 | Public configuration, finding, and snapshot schemas | MD-003 |
+| MD-005 | CI, tests, and package build | MD-001 |
+| MD-006 | Self-contained example workspace | MD-004 |
 | MD-007 | Pre-1.0 compatibility policy | MD-004 |
 
 ## Acceptance
 
-- `uv tool install .` и `locus.md --help` работают.
-- Schemas публикуются в wheel.
-- Example config проходит `config validate`.
-- CI собирает sdist и wheel.
-- Core не содержит dependency на Locus.
+- `uv tool install .` and `locus.md --help` work.
+- Schemas are present in the wheel.
+- The example passes `config validate`.
+- CI builds and tests the package.
+- The core has no application-specific runtime dependency.
 
 # 3. Milestone M1 — static documentation engine
 
 ## Goal
 
-Полезный standalone lint без providers.
+Provide useful standalone lint without providers.
 
 ## Work items
 
 | ID | Task |
 |---|---|
-| MD-101 | Config discovery и namespace isolation |
-| MD-102 | Normalized config model и validation |
-| MD-103 | Surface inventory и path safety |
-| MD-104 | Markdown/frontmatter parser |
-| MD-105 | Link extraction и repository graph |
+| MD-101 | Configuration discovery and namespace isolation |
+| MD-102 | Normalized configuration model and validation |
+| MD-103 | Surface inventory and path safety |
+| MD-104 | Markdown and frontmatter parser |
+| MD-105 | Link extraction and repository graph |
 | MD-106 | Reachability rules |
-| MD-107 | Marker scanner с fenced-code awareness |
-| MD-108 | Finding model и JSON output |
-| MD-109 | `lint`, `config validate`, `contracts list` |
-| MD-110 | Read-only lock/body drift check |
+| MD-107 | Fenced-code-aware marker scanner |
+| MD-108 | Finding model and JSON output |
+| MD-109 | `lint`, `config validate`, and `contracts list` |
+| MD-110 | Read-only lock/body drift detection |
 
 ## Acceptance
 
-- Общий INI с unrelated sections обрабатывается без чтения их значений.
-- Две surfaces имеют разные roots и schemas.
-- Broken link и orphan doc дают stable findings.
-- Marker в code fence не распознаётся.
-- Nested/unclosed/duplicate blocks обнаруживаются.
-- Lint не выполняет network calls.
-- Findings deterministic byte-for-byte.
+- A shared INI with unrelated sections does not expose their values.
+- Different surfaces may use different roots and schemas.
+- Broken links and orphaned documents produce stable findings.
+- Marker-like text inside code fences is ignored.
+- Nested, unclosed, and duplicate blocks are detected.
+- Lint performs no network calls.
+- Findings are byte-for-byte deterministic.
 
 # 4. Milestone M2 — managed projections and file provider
 
 ## Goal
 
-Полный local end-to-end use case.
+Complete one local end-to-end use case.
 
 ## Work items
 
 | ID | Task |
 |---|---|
-| MD-201 | Contract registry и binding resolution |
-| MD-202 | Provider query/snapshot models |
+| MD-201 | Contract registry and binding resolution |
+| MD-202 | Provider query and snapshot models |
 | MD-203 | Built-in `file-json` provider |
-| MD-204 | Contract handler protocol |
-| MD-205 | Bundled `task-table.v1` example handler |
+| MD-204 | Contract-handler protocol |
+| MD-205 | Bundled `task-table.v1` handler |
 | MD-206 | Deterministic renderer |
 | MD-207 | Patch planner |
 | MD-208 | `sync --check` |
 | MD-209 | Transactional `sync --write` |
-| MD-210 | Lock write/update |
+| MD-210 | Lock update |
 | MD-211 | Offline snapshot mode |
 
 ## Acceptance
 
-- Milestone table строится из `data/tasks.json`.
-- Ручное изменение status даёт out-of-date finding.
-- `sync --write` меняет только block body.
-- Текст и whitespace вне spans byte-identical.
-- Второй sync не создаёт diff.
-- Lock содержит snapshot/body digests.
-- Изменение файла между scan и write даёт conflict.
+- A milestone table is built from a tracked JSON source.
+- Manual status changes produce an out-of-date finding.
+- `sync --write` changes only the block body and lock.
+- Text and whitespace outside managed spans remain byte-identical.
+- A second sync produces no diff.
+- Lock evidence contains snapshot and body digests.
+- A source change between scan and write produces a conflict.
 
 # 5. Milestone M3 — plugin platform
 
 ## Goal
 
-Коллеги добавляют integrations без fork.
+Allow third parties to add integrations without forking the core.
 
 ## Work items
 
@@ -117,57 +118,57 @@ description: "Проверено и подключено к навигации �
 |---|---|
 | MD-301 | Entry-point discovery |
 | MD-302 | Provider contract test kit |
-| MD-303 | Contract/renderer plugin APIs |
+| MD-303 | Contract and renderer plugin APIs |
 | MD-304 | Plugin version negotiation |
 | MD-305 | Capability planning |
-| MD-306 | Failure isolation и diagnostic wrapping |
+| MD-306 | Failure isolation and diagnostic wrapping |
 | MD-307 | Plugin authoring guide |
 | MD-308 | Reference plugin fixture |
 
 ## Acceptance
 
-- Third-party package регистрирует provider без изменения core.
-- Unknown API version отклоняется до execution.
-- Provider exceptions становятся provider findings.
-- Test kit проверяет normalization, determinism и partial failures.
+- A third-party package registers a provider without changing the core.
+- Unsupported API versions fail before execution.
+- Provider exceptions become provider findings.
+- The test kit covers normalization, determinism, and partial failures.
 
-# 6. Milestone M4 — Locus integration
+# 6. Milestone M4 — standalone distribution
 
 ## Goal
 
-Подключить core к `locus docs`, сохранив standalone operation.
+Make installation, upgrade, and self-validation reliable without another CLI.
 
 ## Work items
 
 | ID | Task |
 |---|---|
-| MD-401 | `HostServices` API |
-| MD-402 | Host-injected provider |
-| MD-403 | Locus task snapshot mapper |
-| MD-404 | Shared INI compatibility fixture |
-| MD-405 | Command/exit parity tests |
-| MD-406 | Optional snapshot export contract |
-| MD-407 | Integration documentation |
+| MD-401 | Global `uv tool` installation |
+| MD-402 | Canonical `locus.md` executable |
+| MD-403 | Compatibility alias |
+| MD-404 | Wheel entry-point verification |
+| MD-405 | Packaged-schema verification |
+| MD-406 | Self-validation contract |
+| MD-407 | Standalone installation and troubleshooting guide |
 
 ## Acceptance
 
-- `locus docs verify` и `locus.md verify` формируют одинаковую finding schema.
-- Locus host provider использует task policy Locus, но core не читает `[locus.tasks]`.
-- Standalone mode использует exported snapshot.
-- Отсутствующий Locus host не ломает import core.
+- `uv tool install .` exposes `locus.md` globally.
+- The globally installed tool validates this repository and the nested example.
+- Explicit and discovered configuration resolve the same workspace.
+- The wheel contains both executable entry points and all schemas.
 
-# 7. Milestone M5 — GitHub/Linear and ecosystem hardening
+# 7. Milestone M5 — ecosystem hardening
 
 ## Goal
 
-Подтвердить universality двумя remote adapters.
+Prove provider neutrality through optional read-only integrations.
 
 ## Work items
 
 | ID | Task |
 |---|---|
-| MD-501 | Read-only GitHub provider |
-| MD-502 | Read-only Linear provider |
+| MD-501 | First read-only remote provider |
+| MD-502 | Second independent remote provider |
 | MD-503 | Network permission policy |
 | MD-504 | Cache and offline behavior |
 | MD-505 | SARIF output |
@@ -178,48 +179,49 @@ description: "Проверено и подключено к навигации �
 ## Acceptance
 
 ```text
-repository default provider = linear
-block A = explicit local/file snapshot
-block B = inherited linear
+repository default provider = remote
+block A = explicit local file snapshot
+block B = inherited remote provider
 both blocks validate in one document
 provider override is explicit and deterministic
-manual edit in either projection is detected
-free Markdown is untouched
+manual edits in either projection are detected
+authored Markdown remains untouched
 ```
 
 # 8. Critical path
 
 ```text
-Config namespace
+configuration namespace
 → surface inventory
-→ parser/spans
+→ parser and spans
 → contract binding
 → snapshot model
 → deterministic renderer
 → safe rewrite
 → plugin API
-→ Locus/GitHub/Linear adapters
+→ optional external providers
 ```
 
-Provider SDK work не начинается до фиксации snapshot и capability contracts.
+Provider SDK expansion starts only after snapshot and capability contracts are
+stable.
 
-# 9. Issue template
+# 9. Issue contract
 
-Каждый issue содержит:
+Every issue states:
 
 - observable outcome;
-- входные schemas;
+- input schemas;
 - failure semantics;
 - acceptance test;
-- backward-compatibility note;
-- отсутствие hidden dependency на Locus.
+- backward-compatibility impact;
+- confirmation that the core remains standalone.
 
 # 10. Definition of done
 
 - implementation;
 - unit tests;
-- integration/golden test;
-- docs;
-- stable finding code для нового failure mode;
+- integration or golden test;
+- documentation;
+- stable finding code for each new failure mode;
 - no unexplained changes;
-- example/fixture для user-facing surface.
+- a fixture for every user-facing surface.

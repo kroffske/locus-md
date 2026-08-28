@@ -2,4 +2,4 @@
 
 @./AGENTS.md
 
-Инструкции репозитория находятся в `AGENTS.md`, загруженном выше.
+Repository instructions live in `AGENTS.md`, loaded above.

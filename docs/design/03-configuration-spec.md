@@ -9,33 +9,32 @@ tags: [configuration, contract]
 updated: "2026-08-28T00:27:14Z"
 source_commit: "6ecd7cfe5fd1"
 update_event: "user_request"
-description: "Проверено и подключено к навигации и dogfood-контракту Locus MD."
+description: "Validated and connected to Locus MD navigation and self-validation contracts."
 ---
 
-# 1. Цель
+# 1. Purpose
 
-Locus MD работает внутри Locus, как standalone CLI и в чужом репозитории с одним общим project INI.
-
-Конфигурационный контракт не требует установки Locus и не зависит от значений других секций.
+Locus MD runs as a standalone CLI or an embedded library. A repository may use
+one shared project INI file. The documentation contract never depends on values
+from unrelated sections.
 
 # 2. Discovery
 
-Порядок:
+Precedence:
 
 1. `--config PATH`;
 2. `LOCUS_MD_CONFIG`;
 3. `LOCUS_CONFIG`;
-4. поиск вверх:
-   - `.locus/config.ini`;
-   - `locus.ini`;
-   - `.locus.ini`;
-5. остановка на Git root или filesystem root.
+4. upward search for `.locus/config.ini`, `locus.ini`, or `.locus.ini`;
+5. stop at the Git root or filesystem root.
 
-Несколько файлов на одном уровне — configuration error.
+More than one candidate at the same level is a configuration error. The
+selected configuration file defines the workspace root. An enclosing Git
+repository does not override it.
 
 # 3. Namespace isolation
 
-Разрешённые секции:
+Allowed sections:
 
 ```text
 [locus.docs]
@@ -45,57 +44,51 @@ Locus MD работает внутри Locus, как standalone CLI и в чуж
 [locus.docs.rule:<name>]
 ```
 
-Loader:
-
-- синтаксически парсит файл;
-- переносит в normalized model только разрешённые секции;
-- не выполняет interpolation через другие sections;
-- не раскрывает unrelated values в diagnostics;
-- не изменяет unrelated sections при `init`.
-
-Пример общего файла:
+The loader parses the complete INI syntax but copies only allowed sections into
+the normalized model. It does not interpolate unrelated sections, expose their
+values in diagnostics, or rewrite them during initialization.
 
 ```ini
-[locus]
+[application]
 project = example
 
-[locus.tasks]
-provider = linear
+[tasks]
+provider = remote
 
 [locus.docs]
 schema = 1
 surfaces = docs
 ```
 
-Standalone `locus.md` видит только `locus.docs*`.
+Standalone `locus.md` sees only `locus.docs*`.
 
 # 4. Syntax rules
 
 - Encoding: UTF-8.
-- Boolean: `true`/`false`.
-- Integer: base-10.
+- Booleans: `true` and `false`.
+- Integers: base 10.
 - Lists: comma-separated.
-- JSON objects: strict JSON.
-- Paths: POSIX-style в config, relative to workspace root.
-- Duplicate sections и keys — error.
-- Empty value не заменяет missing key без explicit schema rule.
-- `ConfigParser(strict=True, interpolation=None)`.
+- Objects: strict JSON.
+- Paths: POSIX-style and relative to the workspace root.
+- Duplicate sections or keys: error.
+- Empty values do not replace missing required values.
+- Parser: `ConfigParser(strict=True, interpolation=None)`.
 
 # 5. Environment substitution
 
-Разрешён только:
+Allowed:
 
 ```ini
-token = ${ENV:GITHUB_TOKEN}
+token = ${ENV:PROVIDER_TOKEN}
 ```
 
-Запрещено:
+Forbidden:
 
 ```ini
-value = ${locus.tasks:provider}
+value = ${tasks:provider}
 ```
 
-Core не имеет cross-section dependency.
+The core has no cross-section dependency.
 
 # 6. Global section
 
@@ -112,17 +105,20 @@ network = explicit
 unverified = fail
 ```
 
-| Key | Type | Default | Semantics |
+| Key | Type | Default | Meaning |
 |---|---:|---|---|
-| `schema` | int | required | Версия INI contract |
-| `surfaces` | list | required | Активные surface IDs |
-| `strict` | bool | `false` | Повышение configured warnings |
+| `schema` | int | required | INI contract version |
+| `surfaces` | list | required | Active surface IDs |
+| `strict` | bool | `false` | Promote configured warnings |
 | `lock_file` | path | `.locus/docs.lock.json` | Tracked projection evidence |
 | `cache_dir` | path | `.locus/cache/locus-md` | Ignored acceleration state |
 | `report_dir` | path | empty | Optional run reports |
-| `default_output` | enum | `human` | `human` или `json` |
-| `network` | enum | `explicit` | `deny`, `explicit`, `allow` |
-| `unverified` | enum | `fail` | `fail`, `warn`, `ignore` |
+| `default_output` | enum | `human` | `human` or `json` |
+| `network` | enum | `explicit` | `deny`, `explicit`, or `allow` |
+| `unverified` | enum | `fail` | `fail`, `warn`, or `ignore` |
+
+`cache_dir` and `report_dir` are validated and exposed in the normalized
+configuration. Version `0.1.1` does not yet write cache or report files.
 
 # 7. Surface section
 
@@ -140,20 +136,20 @@ follow_symlinks = false
 default_provider = tasks
 ```
 
-| Key | Required | Semantics |
+| Key | Required | Meaning |
 |---|---:|---|
-| `root` | yes | Корень surface |
+| `root` | yes | Surface root |
 | `include` | yes | Include globs |
 | `exclude` | no | Exclude globs |
-| `index` | no | Один или несколько graph roots |
-| `frontmatter` | no | `required`, `optional`, `forbidden` |
-| `frontmatter_schema` | no | JSON Schema |
-| `require_reachable` | no | Проверять reachability |
-| `allow_external_links` | no | Разрешать remote URLs |
-| `follow_symlinks` | no | По умолчанию false |
-| `default_provider` | no | Provider для `inherit` |
+| `index` | no | One or more graph roots |
+| `frontmatter` | no | `required`, `optional`, or `forbidden` |
+| `frontmatter_schema` | no | JSON Schema path |
+| `require_reachable` | no | Require index reachability |
+| `allow_external_links` | no | Allow remote URLs |
+| `follow_symlinks` | no | Follow symlinked documents; default false |
+| `default_provider` | no | Provider used by inherited bindings |
 
-Surface name: `[a-z][a-z0-9-]{0,31}`.
+Surface names match `[a-z][a-z0-9-]{0,31}`.
 
 # 8. Provider section
 
@@ -168,17 +164,16 @@ snapshot_file = .locus/snapshots/tasks.json
 
 Reserved keys:
 
-| Key | Semantics |
+| Key | Meaning |
 |---|---|
-| `adapter` | Entry-point name |
-| `required` | Влияет на aggregate result |
-| `network` | Требуется ли network permission |
+| `adapter` | Python entry-point name |
+| `required` | Whether failure affects the aggregate result |
+| `network` | Whether the provider needs network permission |
 | `snapshot_file` | Optional offline snapshot |
-| `cache_ttl` | Optional cache policy |
+| `cache_ttl` | Reserved cache policy; parsed but not executed in `0.1.1` |
 
-Остальные keys передаются plugin как string options.
-
-Provider name не равен tracker name. Два GitHub repositories могут быть providers `core-issues` и `docs-issues`.
+All other keys are passed to the plugin as string options. Provider names are
+local identities, not service names.
 
 # 9. Contract section
 
@@ -197,25 +192,25 @@ severity = error
 required = true
 ```
 
-Binding key:
+Binding identity:
 
 ```text
 surface + normalized path + block_kind + block_id
 ```
 
-| Key | Required | Semantics |
+| Key | Required | Meaning |
 |---|---:|---|
 | `surface` | yes | Surface ID |
-| `path` | yes | Relative path внутри surface |
+| `path` | yes | Path relative to the surface |
 | `block_kind` | yes | Marker kind |
-| `block_id` | yes | Short ID |
+| `block_id` | yes | Short local identifier |
 | `schema` | yes | Contract schema |
-| `mode` | yes | `authored`, `projection`, `snapshot` |
-| `provider` | conditional | Provider ID или `inherit` |
+| `mode` | yes | `authored`, `projection`, or `snapshot` |
+| `provider` | conditional | Provider ID or inherited surface default |
 | `selector` | conditional | Strict JSON object |
 | `renderer` | projection | Renderer ID |
-| `severity` | no | Default severity |
-| `required` | no | Binding без marker является error |
+| `severity` | no | Default finding severity |
+| `required` | no | Treat a missing marker as an error |
 
 # 10. Rule section
 
@@ -227,50 +222,39 @@ severity = error
 options = {"registry":"docs/policies.json"}
 ```
 
-Rule plugins работают на envelope, graph или workspace scope и не выполняют writes через `lint`/`verify`.
+The namespace is reserved, but rule execution is not implemented in API
+`0.1.1`. Declaring a rule currently fails configuration validation with
+`CFG-037`; the tool never silently ignores it.
 
 # 11. Precedence
 
-## Config path
+Configuration path:
 
 ```text
 CLI > LOCUS_MD_CONFIG > LOCUS_CONFIG > discovery
 ```
 
-## Contract fields
+Contract fields:
 
 ```text
-explicit contract
-    >
-surface default
-    >
-global default
-    >
-built-in safe default
+explicit contract > surface default > global default > safe built-in default
 ```
 
-Provider и mode не угадываются без однозначного default.
+Provider and mode are never guessed without an unambiguous default. CLI flags
+may select surfaces or providers, deny network, choose output, and raise
+strictness. They never change provider, mode, selector, or renderer semantics.
 
-## CLI flags
+# 12. Configuration editing
 
-Flags могут выбирать surfaces/providers, запрещать network, менять output и повышать strictness. Они не меняют `provider`, `mode`, `selector` или `renderer` contract.
-
-# 12. Config editing
-
-`locus.md init`:
-
-- создаёт `.locus/config.ini`, если файла нет;
-- добавляет только отсутствующие `locus.docs*` sections;
-- не форматирует весь INI;
-- поддерживает `--check` и `--print`.
-
-Full-file normalize не входит в MVP.
+`locus.md init` creates `.locus/config.ini` when missing or adds only absent
+`locus.docs*` sections. It does not reformat the complete INI. `--check` and
+`--print` provide non-writing modes.
 
 # 13. Validation codes
 
 ```text
 CFG-001 config file not found
-CFG-002 duplicate section
+CFG-002 duplicate section or key
 CFG-003 unsupported schema
 CFG-010 unknown surface
 CFG-020 unknown provider
@@ -282,4 +266,5 @@ CFG-060 ambiguous config discovery
 
 # 14. Compatibility
 
-Будущая TOML-поддержка возможна отдельным frontend, который строит тот же normalized model.
+A future TOML frontend may build the same normalized model. It must preserve
+the namespace and isolation rules defined here.

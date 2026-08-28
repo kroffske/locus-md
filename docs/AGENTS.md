@@ -1,23 +1,23 @@
 ---
-title: Правила документации Locus MD
+title: Locus MD Documentation Rules
 type: guide
 status: active
 owner: team:locus-md
 tags: [documentation, authoring]
 ---
 
-# Документация Locus MD
+# Locus MD Documentation
 
-Используй `$locus-docs` для изменения этой директории. Общий формат задаёт
-`locus-docs/references/documentation-standard.md` из установленного набора Locus.
+This file is the local contract for documentation changes. Keep each page
+self-contained, link it from the public index, and verify it with `locus.md`.
 
-Порядок чтения:
+Reading order:
 
-1. `index.md` — карта документации.
-2. `design/00-executive-summary.md` — продуктовая граница.
-3. `design/01-product-requirements.md` — проверяемые требования.
-4. `design/02-system-design.md` — компоненты и зависимости.
-5. `implementation-status.md` — текущая реализованная поверхность.
+1. `index.md` — documentation map.
+2. `design/00-executive-summary.md` — product boundary.
+3. `design/01-product-requirements.md` — verifiable requirements.
+4. `design/02-system-design.md` — components and dependencies.
+5. `implementation-status.md` — current implemented surface.
 
-`docs/index.md` остаётся единственной публичной точкой входа. Новая страница
-добавляется в индекс тем же изменением. Frontmatter проверяют Locus и Locus MD.
+`docs/index.md` remains the single public entry point. Add every new page to
+the index in the same change. Locus MD validates frontmatter and links.

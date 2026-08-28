@@ -1,21 +1,20 @@
 # Locus MD
 
-Этот файл — единый репозиторный контракт для агентов. Вложенный `AGENTS.md`
-может уточнять правила только для своей директории.
+This file is the single repository contract for agents. A nested `AGENTS.md`
+may add rules only for its own directory.
 
-## Назначение
+## Purpose
 
-Locus MD — самостоятельная Python-библиотека и CLI для детерминированных
-семантических контрактов над Markdown. Свободный текст остаётся человеческим.
-Инструмент проверяет структуру, граф ссылок и управляемые проекции данных.
+Locus MD is a standalone Python library and CLI for deterministic semantic
+contracts over Markdown. Authored prose remains free-form. The tool validates
+document structure, link graphs, and managed data projections.
 
-## Начало работы
+## Getting started
 
-Перед существенной работой запусти `locus context preamble`. Создай окружение и
-установи проект командой `python3 -m venv .venv && .venv/bin/python -m pip
-install -e '.[dev]'`.
+Create an environment and install the project with `python3 -m venv .venv &&
+.venv/bin/python -m pip install -e '.[dev]'`.
 
-Проверки:
+Verification commands:
 
 ```bash
 .venv/bin/python -m pytest
@@ -24,22 +23,26 @@ PATH="$PWD/.venv/bin:$PATH" make example
 .venv/bin/locus.md lint
 .venv/bin/locus.md verify --offline
 .venv/bin/locus.md sync --check --offline
-locus docs lint
 ```
 
-Глобальная установка: `uv tool install --force .`. Сборка wheel:
+Install the global tool with `uv tool install --force .`. Build a wheel with
 `.venv/bin/python -m pip wheel . --no-deps -w dist`.
 
-## Правила изменений
+Optional host metadata is separate from the product. If this checkout uses
+Locus project memory, run `locus init` to regenerate its private
+`.locus/AGENTS.md` registry. Locus MD never reads that registry.
 
-- `src/locus_md/` не импортирует Locus, GitHub, Linear или конкретный task tracker.
-- Locus MD читает из общего INI только секции `[locus.docs*]`.
-- Изменение managed block не должно менять байты вне его span.
-- Новый provider или contract failure получает стабильный finding code и тест.
-- `dist/` содержит снимок локальной сборки. Не считай его текущим без новой проверки установки.
-- `.locus/AGENTS.md` — локальный registry Locus. В clean clone его создаёт `locus init`.
-- Перед локальным коммитом загрузи `locus context skill locus-ship` и stage только принадлежащие изменению пути.
-- Не выполняй push, публикацию пакета или внешнюю запись без явного запроса.
+## Change rules
+
+- `src/locus_md/` must not import a host application, remote tracker, or concrete task store.
+- Locus MD reads only `[locus.docs*]` sections from a shared INI file.
+- A managed-block update must preserve every byte outside its span.
+- Every new provider or contract failure requires a stable finding code and a test.
+- `dist/` contains a saved build snapshot. Treat it as current only after a new installation check.
+- Before a local commit, run the repository checks and stage exact owned paths.
+- Do not push, publish a package, or perform an external write without explicit authorization.
+- Write repository documentation and persisted project prose in English.
+- Never put user-specific absolute paths, usernames, or sibling-repository references in public documentation.
 
 <navigation>
 <!-- Where things live. Describe every major directory and entry point.
@@ -49,22 +52,22 @@ locus docs lint
 <!-- locus:nav:v1:begin -->
 | path | what | git |
 | --- | --- | --- |
-| `README.md` | Пользовательская точка входа и быстрый запуск | tracked |
-| `AGENTS.md` | Репозиторный контракт и проверяемая навигация | tracked |
-| `CLAUDE.md` | Точка входа Claude Code; ссылается на `AGENTS.md` | tracked |
-| `ARCHITECTURE.md` | Краткая карта границ и пути выполнения | tracked |
-| `docs/` | Документация; порядок чтения начинается с `docs/index.md` | tracked |
-| `src/locus_md/` | Python-пакет, CLI, engine, providers и schemas | tracked |
-| `tests/` | Pytest-проверки публичных и внутренних контрактов | tracked |
-| `examples/` | Самодостаточные рабочие пространства для acceptance-проверок | tracked |
-| `schemas/` | JSON Schema для документации самого репозитория | tracked |
-| `data/` | Нормализованные источники dogfood-контрактов | tracked |
-| `.locus/config.ini` | Tracked manifest контрактов Locus MD | tracked |
-| `.locus/docs.lock.json` | Воспроизводимое evidence последней materialization | tracked |
-| `.locus/soul.md` | Локальная продуктовая идентичность и долгосрочные границы | local |
-| `.tasks/` | Локальные task workspaces и evidence | local |
-| `.venv/` | Локальное Python-окружение | local |
-| `dist/` | Сохранённый wheel исходного релизного снимка | tracked |
-| `.github/` | CI workflow для Python 3.11–3.13 | tracked |
+| `README.md` | User entry point and quick start | tracked |
+| `AGENTS.md` | Repository contract and validated navigation | tracked |
+| `CLAUDE.md` | Claude Code entry point that references `AGENTS.md` | tracked |
+| `ARCHITECTURE.md` | Compact boundary map and execution path | tracked |
+| `docs/` | Documentation; reading starts at `docs/index.md` | tracked |
+| `src/locus_md/` | Python package, CLI, engine, providers, and schemas | tracked |
+| `tests/` | Pytest coverage for public and internal contracts | tracked |
+| `examples/` | Self-contained workspaces for acceptance checks | tracked |
+| `schemas/` | JSON Schema for this repository's documentation | tracked |
+| `data/` | Normalized sources used by self-validation contracts | tracked |
+| `.locus/config.ini` | Tracked Locus MD contract manifest | tracked |
+| `.locus/docs.lock.json` | Reproducible evidence of the last materialization | tracked |
+| `.locus/soul.md` | Local product identity and durable direction | local |
+| `.tasks/` | Local task workspaces and evidence | local |
+| `.venv/` | Local Python environment | local |
+| `dist/` | Saved wheel from the original release snapshot | tracked |
+| `.github/` | CI workflow for Python 3.11–3.13 | tracked |
 <!-- locus:nav:v1:end -->
 </navigation>

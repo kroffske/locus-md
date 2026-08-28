@@ -9,126 +9,127 @@ tags: [product, requirements]
 updated: "2026-08-28T00:27:14Z"
 source_commit: "6ecd7cfe5fd1"
 update_event: "user_request"
-description: "Проверено и подключено к навигации и dogfood-контракту Locus MD."
+description: "Validated and connected to Locus MD navigation and self-validation contracts."
 ---
 
-# 1. Проблема
+# 1. Problem
 
-Markdown-репозитории смешивают четыре класса содержания:
+Markdown repositories combine four classes of content:
 
-1. **Authored prose** — rationale, объяснения, заметки.
-2. **Document envelope** — title, type, status, owner, provenance.
-3. **Repository graph** — links, indexes, reachability, ownership.
-4. **Materialized projections** — task tables, milestone status, inventories, generated indexes.
+1. **Authored prose** — rationale, explanations, and notes.
+2. **Document envelope** — title, type, status, owner, and provenance.
+3. **Repository graph** — links, indexes, reachability, and ownership.
+4. **Materialized projections** — task tables, milestone status, inventories, and generated indexes.
 
-Обычные Markdown-линтеры проверяют форму, но не могут доказать, что таблица задач соответствует реальному tracker, индекс покрывает все страницы или policy действительно исполняется.
+Ordinary Markdown linters validate form. They cannot prove that a task table
+matches its source, that an index reaches every required page, or that an active
+policy has an executable validator.
 
-Основной failure mode:
+> A document can look structured and current while remaining a manual
+> declaration with no reproducible contract.
 
-> Документ выглядит структурированным и актуальным, но является вручную поддерживаемой декларацией без воспроизводимого контракта.
-
-# 2. Пользователи
+# 2. Users
 
 ## Maintainer
 
-Хочет включить deterministic gate в CI и видеть конкретные findings с путём и remediation.
+Needs a deterministic CI gate with findings that name the path and remediation.
 
 ## Documentation platform owner
 
-Определяет surfaces, schemas, graph rules и managed projections.
+Defines surfaces, schemas, graph rules, and managed projections.
 
 ## Tool integrator
 
-Подключает provider или contract kind без fork ядра.
+Adds a provider or contract kind without forking the core.
 
 ## LLM agent
 
-Должен понимать, какие участки можно свободно редактировать, а какие принадлежат машине.
+Must distinguish freely editable regions from machine-owned regions.
 
 ## CI
 
-Требует стабильных exit codes, JSON/SARIF и воспроизводимости в clean checkout.
+Requires stable exit codes, machine-readable output, and clean-checkout
+reproducibility.
 
 # 3. Product goals
 
-- Проверять структуру документов и frontmatter.
-- Проверять repository graph.
-- Объявлять typed managed blocks.
-- Сверять блоки с provider snapshots.
-- Безопасно обновлять projections.
-- Работать standalone.
-- Интегрироваться с Locus без зависимости core от Locus.
-- Поддерживать custom surfaces, contracts, providers и renderers.
-- Давать одинаковый результат человеку, CI и LLM-host.
+- Validate document structure and frontmatter.
+- Validate the repository graph.
+- Declare typed managed blocks.
+- Compare blocks with provider snapshots.
+- Update projections safely.
+- Run as a standalone tool.
+- Support custom surfaces, contracts, providers, and renderers.
+- Produce the same result for humans, CI, and programmatic hosts.
 
 # 4. Non-goals
 
-- Не заменять `markdownlint`, Vale, spellcheck или site generator.
-- Не создавать и не закрывать remote tasks в docs-командах.
-- Не определять source of truth эвристически.
-- Не переписывать authored prose.
-- Не делать bidirectional sync в первой стабильной линии.
-- Не хранить secrets.
-- Не становиться VCS или object store.
-- Не выполнять произвольные shell-команды из config.
-- Не считать LLM частью trusted validation path.
+- Replace `markdownlint`, Vale, spell checking, or a site generator.
+- Create or close remote tasks from documentation commands.
+- Infer the source of truth heuristically.
+- Rewrite authored prose.
+- Provide bidirectional synchronization in the first stable line.
+- Store secrets.
+- Become a VCS or object store.
+- Execute arbitrary shell commands from configuration.
+- Treat an LLM as part of the trusted validation path.
 
 # 5. Functional requirements
 
 | ID | Requirement |
 |---|---|
-| FR-001 | Config discovery через explicit path, environment или project discovery |
-| FR-002 | Чтение только `locus.docs*` sections |
-| FR-003 | Несколько independent documentation surfaces |
-| FR-004 | UTF-8 Markdown, YAML frontmatter, links, fenced blocks и HTML comments |
-| FR-005 | JSON Schema для frontmatter |
-| FR-006 | Repository graph: links, roots, indexes и reachability |
-| FR-007 | Парные managed markers, ошибки nesting/duplicates/unclosed |
-| FR-008 | Binding по `surface + path + kind + id` |
-| FR-009 | Полный provider query plan до I/O |
-| FR-010 | Immutable normalized provider snapshots |
-| FR-011 | Domain validation через contract handler |
-| FR-012 | Deterministic render для projections |
-| FR-013 | `sync --check` без writes |
-| FR-014 | `sync --write` меняет только block body и lock |
-| FR-015 | Offline mode с `unverified`, если snapshot отсутствует |
-| FR-016 | Plugins через Python entry points |
-| FR-017 | Human и JSON output; SARIF после MVP |
-| FR-018 | Stable rule IDs |
-| FR-019 | Host integration API для Locus |
-| FR-020 | Static lock/body drift detection без provider access |
+| FR-001 | Discover configuration through an explicit path, environment, or project search |
+| FR-002 | Read only `locus.docs*` sections |
+| FR-003 | Support multiple independent documentation surfaces |
+| FR-004 | Parse UTF-8 Markdown, YAML frontmatter, links, fenced blocks, and HTML comments |
+| FR-005 | Validate frontmatter with JSON Schema |
+| FR-006 | Build a repository graph of links, roots, indexes, and reachability |
+| FR-007 | Validate paired managed markers, nesting, duplicates, and missing endpoints |
+| FR-008 | Bind contracts by `surface + path + kind + id` |
+| FR-009 | Build the full provider query plan before I/O |
+| FR-010 | Capture immutable normalized provider snapshots |
+| FR-011 | Run domain validation through contract handlers |
+| FR-012 | Render projections deterministically |
+| FR-013 | Run `sync --check` without writes |
+| FR-014 | Restrict `sync --write` to block bodies and lock evidence |
+| FR-015 | Return `unverified` offline when required evidence is absent |
+| FR-016 | Discover plugins through Python entry points |
+| FR-017 | Provide human and JSON output; add SARIF after the first release |
+| FR-018 | Keep stable rule and finding identifiers |
+| FR-019 | Expose a public host-integration API |
+| FR-020 | Detect lock/body drift without provider access |
 
 # 6. Non-functional requirements
 
 | ID | Requirement |
 |---|---|
-| NFR-001 | Deterministic ordering и output |
-| NFR-002 | Idempotent sync |
-| NFR-003 | Byte preservation вне managed spans |
-| NFR-004 | Reproducible static checks в clean checkout |
-| NFR-005 | Раздельные failure states |
-| NFR-006 | Plugin extensibility без изменения engine |
-| NFR-007 | Path, symlink, secret и plugin security |
-| NFR-008 | Linux, macOS и Windows |
-| NFR-009 | Parse once, batch queries, hash cache |
-| NFR-010 | Run ID, config digest, snapshot digests и plugin versions |
+| NFR-001 | Deterministic ordering and output |
+| NFR-002 | Idempotent synchronization |
+| NFR-003 | Byte preservation outside managed spans |
+| NFR-004 | Reproducible static checks in a clean checkout |
+| NFR-005 | Distinct failure states |
+| NFR-006 | Plugin extensibility without engine changes |
+| NFR-007 | Path, symlink, secret, and plugin security |
+| NFR-008 | Linux, macOS, and Windows support |
+| NFR-009 | Parse once, batch queries, and cache by digest |
+| NFR-010 | Run IDs plus configuration, snapshot, and plugin-version evidence |
 
-# 7. Success metrics
+# 7. Success measures
 
-- доля репозиториев, где `sync --check` работает в clean checkout;
-- число false positive findings;
-- число ручных изменений managed blocks, остановленных до merge;
-- доля providers, проходящих общий contract test suite;
-- число изменений authored prose при sync — всегда ноль;
-- стабильность JSON schema между patch/minor releases;
-- ускорение повторного запуска на неизменившемся workspace.
+- Share of repositories where `sync --check` works in a clean checkout.
+- Number of false-positive findings.
+- Number of manual managed-block edits stopped before merge.
+- Share of providers that pass the shared contract test suite.
+- Number of authored-prose changes caused by sync: always zero.
+- JSON Schema stability across patch and minor releases.
+- Repeat-run speed on an unchanged workspace.
 
 # 8. Product invariants
 
-- Config задаёт intent.
-- Provider задаёт external truth.
-- Managed projection не становится вторым source of truth.
-- Lock хранит evidence, но не заменяет provider.
-- CLI flag фильтрует работу, но не переосмысливает contract.
-- LLM не участвует в pass/fail.
-- Remote mutation не выполняется docs engine.
+- Configuration declares intent.
+- The provider supplies external truth.
+- A managed projection is not a second source of truth.
+- The lock records evidence but never replaces the provider.
+- A CLI flag filters work but never changes contract meaning.
+- An LLM never decides pass or fail.
+- The documentation engine never performs remote mutation.

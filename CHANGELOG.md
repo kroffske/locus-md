@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Rewrite public documentation and local project guidance in English.
+- Remove machine-specific paths, usernames, and sibling-repository references from documentation.
+
 ## 0.1.1
 
 - Bind each workspace to the selected config location instead of an enclosing Git root.

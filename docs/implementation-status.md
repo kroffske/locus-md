@@ -9,25 +9,25 @@ tags: [implementation, dogfood]
 updated: "2026-08-28T00:27:13Z"
 source_commit: "6ecd7cfe5fd1"
 update_event: "user_request"
-description: "Проверено и подключено к навигации и dogfood-контракту Locus MD."
+description: "Validated and connected to Locus MD navigation and self-validation contracts."
 ---
 
 # Implementation status
 
-## Реализованный dogfood-контур
+## Implemented self-validation path
 
-Эта таблица материализуется из `data/project-status.json`. Файл конфигурации
-`.locus/config.ini` связывает источник с блоком. Свободный текст ниже не
-перезаписывается.
+This table is materialized from `data/project-status.json`. The
+`.locus/config.ini` manifest binds the source to this block. Synchronization
+never rewrites the authored text outside the markers.
 
 <!-- locus:milestone dogfood begin -->
 | Task | Title | Status |
 |---|---|---|
-| MD-001 | Создать самостоятельный Python-пакет и CLI | done |
-| MD-002 | Проверять Markdown-поверхности и ссылки | done |
-| MD-003 | Проверять и синхронизировать managed blocks | done |
-| MD-004 | Подключить контракт к репозиторию Locus MD | done |
-| MD-005 | Установить locus.md глобально через uv tool | done |
+| MD-001 | Create the standalone Python package and CLI | done |
+| MD-002 | Validate Markdown surfaces and links | done |
+| MD-003 | Validate and synchronize managed blocks | done |
+| MD-004 | Apply a document contract to the Locus MD repository | done |
+| MD-005 | Install locus.md globally with uv tool | done |
 <!-- locus:milestone dogfood end -->
 
 ## Deliberately deferred
