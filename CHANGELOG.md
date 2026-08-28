@@ -1,9 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.1.1
 
 - Bind each workspace to the selected config location instead of an enclosing Git root.
 - Add the repository's own tracked document contract, documentation index, and navigation.
+- Install `locus.md` as the primary standalone CLI through `uv tool`; keep `locus-md` as a compatibility alias.
 
 ## 0.1.0
 

@@ -14,28 +14,28 @@ description: "Проверено и подключено к навигации �
 
 # 1. Командная модель
 
-## `locus-md init`
+## `locus.md init`
 
 Создаёт или добавляет namespaced config scaffold.
 
 ```bash
-locus-md init
-locus-md init --config .locus/config.ini --check
-locus-md init --print
+locus.md init
+locus.md init --config .locus/config.ini --check
+locus.md init --print
 ```
 
-## `locus-md config validate`
+## `locus.md config validate`
 
 Проверяет discovery, namespace, types, paths и plugin references.
 
 ```bash
-locus-md config validate
-locus-md config show --normalized
+locus.md config validate
+locus.md config show --normalized
 ```
 
 `show` не выводит secret-like values.
 
-## `locus-md lint`
+## `locus.md lint`
 
 Только static checks:
 
@@ -49,48 +49,48 @@ locus-md config show --normalized
 Не открывает network providers.
 
 ```bash
-locus-md lint
-locus-md lint --surface docs
-locus-md lint --format json
+locus.md lint
+locus.md lint --surface docs
+locus.md lint --format json
 ```
 
-## `locus-md verify`
+## `locus.md verify`
 
 Добавляет provider assertions.
 
 ```bash
-locus-md verify
-locus-md verify --offline
-locus-md verify --provider tasks
+locus.md verify
+locus.md verify --offline
+locus.md verify --provider tasks
 ```
 
 `--provider` фильтрует contracts, но не заменяет provider в config.
 
-## `locus-md sync --check`
+## `locus.md sync --check`
 
 Строит canonical projections без writes.
 
 ```bash
-locus-md sync --check
+locus.md sync --check
 ```
 
 Human output показывает summary и unified diff; JSON содержит patches.
 
-## `locus-md sync --write`
+## `locus.md sync --write`
 
 Применяет deterministic patches и обновляет lock.
 
 ```bash
-locus-md sync --write
+locus.md sync --write
 ```
 
 Без `--write` команда не модифицирует workspace.
 
-## `locus-md contracts list`
+## `locus.md contracts list`
 
 Показывает configured bindings, найденные blocks, providers, schema/renderer, state и lock status.
 
-## `locus-md doctor`
+## `locus.md doctor`
 
 Проверяет environment, plugin versions, writable paths, Git state, network policy и availability authentication. Doctor не является validation gate.
 
@@ -101,7 +101,7 @@ locus-md sync --write
 ```text
 ERROR DOC-BLOCK-OUT-OF-DATE docs/milestones.md:14
   Contract active-milestone differs from provider snapshot tasks@rev-42.
-  Run: locus-md sync --check
+  Run: locus.md sync --check
 ```
 
 ## JSON
@@ -200,17 +200,17 @@ internal-error
 ## Basic offline
 
 ```bash
-locus-md config validate
-locus-md lint
-locus-md verify --offline
-locus-md sync --check --offline
+locus.md config validate
+locus.md lint
+locus.md verify --offline
+locus.md sync --check --offline
 ```
 
 ## Network-enabled
 
 ```bash
-locus-md verify --network
-locus-md sync --check --network
+locus.md verify --network
+locus.md sync --check --network
 ```
 
 Network разрешается явно при `network=explicit`.
@@ -220,7 +220,7 @@ Network разрешается явно при `network=explicit`.
 Post-MVP:
 
 ```bash
-locus-md lint --changed origin/main
+locus.md lint --changed origin/main
 ```
 
 Graph dependencies расширяют affected set за пределы изменённых файлов.
@@ -231,7 +231,7 @@ Recommended hook:
 
 ```yaml
 - repo: https://github.com/example/locus-md
-  rev: v0.1.0
+  rev: v0.1.1
   hooks:
     - id: locus-md-lint
 ```
@@ -246,7 +246,7 @@ Finding может включать:
 {
   "remediation": {
     "kind": "command",
-    "value": "locus-md sync --check"
+    "value": "locus.md sync --check"
   }
 }
 ```

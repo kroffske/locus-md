@@ -11,7 +11,7 @@ from .common import build_snapshot, load_snapshot_file, select_query_union
 class SnapshotProvider:
     api_version = "1"
     plugin_id = "snapshot"
-    plugin_version = "0.1.0"
+    plugin_version = "0.1.1"
 
     def validate_config(self, options: Mapping[str, str]) -> list[Finding]:
         if not options.get("path"):
@@ -38,7 +38,7 @@ class SnapshotSession:
             raise ProviderUnavailable(self.context.provider_name, f"path escapes workspace: {raw_path}")
         source = load_snapshot_file(path, provider=self.context.provider_name)
         records = select_query_union(source.records, queries)
-        return build_snapshot(provider=self.context.provider_name, adapter="snapshot", adapter_version="0.1.0", revision=source.revision,
+        return build_snapshot(provider=self.context.provider_name, adapter="snapshot", adapter_version="0.1.1", revision=source.revision,
                               consistency=source.consistency, captured_at=source.captured_at, records=records)
 
     def close(self) -> None:

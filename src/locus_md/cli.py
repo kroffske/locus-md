@@ -168,8 +168,8 @@ def _add_common_options(target: argparse.ArgumentParser, *, suppress_defaults: b
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="locus-md", description="Semantic documentation contracts for Markdown repositories")
-    parser.add_argument("--version", action="version", version=f"locus-md {__version__}")
+    parser = argparse.ArgumentParser(prog="locus.md", description="Semantic documentation contracts for Markdown repositories")
+    parser.add_argument("--version", action="version", version=f"locus.md {__version__}")
     _add_common_options(parser, suppress_defaults=False)
     commands = parser.add_subparsers(dest="command", required=True)
 

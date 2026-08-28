@@ -1,10 +1,13 @@
-.PHONY: test example wheel
+.PHONY: test example wheel install-tool
 
 test:
 	PYTHONPATH=src pytest
 
 example:
-	cd examples/basic && PYTHONPATH=../../src python -m locus_md config validate && PYTHONPATH=../../src python -m locus_md lint && PYTHONPATH=../../src python -m locus_md verify --offline && PYTHONPATH=../../src python -m locus_md sync --check --offline
+	cd examples/basic && locus.md config validate && locus.md lint && locus.md verify --offline && locus.md sync --check --offline
 
 wheel:
 	python -m pip wheel . --no-deps -w dist
+
+install-tool:
+	uv tool install --force .

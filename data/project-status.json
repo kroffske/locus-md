@@ -44,6 +44,17 @@
         "milestone": "dogfood"
       },
       "url": null
+    },
+    {
+      "kind": "task",
+      "id": "MD-005",
+      "revision": "1",
+      "fields": {
+        "title": "Установить locus.md глобально через uv tool",
+        "status": "done",
+        "milestone": "dogfood"
+      },
+      "url": null
     }
   ]
 }

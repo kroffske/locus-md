@@ -67,7 +67,7 @@ schema = 1
 surfaces = docs
 ```
 
-Standalone `locus-md` видит только `locus.docs*`.
+Standalone `locus.md` видит только `locus.docs*`.
 
 # 4. Syntax rules
 
@@ -257,7 +257,7 @@ Flags могут выбирать surfaces/providers, запрещать network
 
 # 12. Config editing
 
-`locus-md init`:
+`locus.md init`:
 
 - создаёт `.locus/config.ini`, если файла нет;
 - добавляет только отсутствующие `locus.docs*` sections;

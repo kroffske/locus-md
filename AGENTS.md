@@ -20,14 +20,15 @@ install -e '.[dev]'`.
 ```bash
 .venv/bin/python -m pytest
 PATH="$PWD/.venv/bin:$PATH" make example
-.venv/bin/locus-md config validate
-.venv/bin/locus-md lint
-.venv/bin/locus-md verify --offline
-.venv/bin/locus-md sync --check --offline
+.venv/bin/locus.md config validate
+.venv/bin/locus.md lint
+.venv/bin/locus.md verify --offline
+.venv/bin/locus.md sync --check --offline
 locus docs lint
 ```
 
-Сборка wheel: `.venv/bin/python -m pip wheel . --no-deps -w dist`.
+Глобальная установка: `uv tool install --force .`. Сборка wheel:
+`.venv/bin/python -m pip wheel . --no-deps -w dist`.
 
 ## Правила изменений
 

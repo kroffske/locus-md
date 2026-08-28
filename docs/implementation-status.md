@@ -27,6 +27,7 @@ description: "Проверено и подключено к навигации �
 | MD-002 | Проверять Markdown-поверхности и ссылки | done |
 | MD-003 | Проверять и синхронизировать managed blocks | done |
 | MD-004 | Подключить контракт к репозиторию Locus MD | done |
+| MD-005 | Установить locus.md глобально через uv tool | done |
 <!-- locus:milestone dogfood end -->
 
 ## Deliberately deferred

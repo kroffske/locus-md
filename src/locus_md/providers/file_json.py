@@ -11,7 +11,7 @@ from .common import build_snapshot, load_json, parse_entity_records, select_quer
 class FileJsonProvider:
     api_version = "1"
     plugin_id = "file-json"
-    plugin_version = "0.1.0"
+    plugin_version = "0.1.1"
 
     def validate_config(self, options: Mapping[str, str]) -> list[Finding]:
         if not options.get("path"):
@@ -40,7 +40,7 @@ class FileJsonSession:
         records = select_query_union(parse_entity_records(payload, provider=self.context.provider_name), queries)
         raw = path.read_bytes()
         revision = str(payload.get("revision")) if isinstance(payload, dict) and payload.get("revision") is not None else digest_bytes(raw)
-        return build_snapshot(provider=self.context.provider_name, adapter="file-json", adapter_version="0.1.0", revision=revision, consistency="local", records=records)
+        return build_snapshot(provider=self.context.provider_name, adapter="file-json", adapter_version="0.1.1", revision=revision, consistency="local", records=records)
 
     def close(self) -> None:
         return None

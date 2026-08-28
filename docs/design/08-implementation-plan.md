@@ -36,7 +36,7 @@ description: "Проверено и подключено к навигации �
 
 ## Acceptance
 
-- `pip install -e .` и `locus-md --help` работают.
+- `uv tool install .` и `locus.md --help` работают.
 - Schemas публикуются в wheel.
 - Example config проходит `config validate`.
 - CI собирает sdist и wheel.
@@ -151,7 +151,7 @@ description: "Проверено и подключено к навигации �
 
 ## Acceptance
 
-- `locus docs verify` и `locus-md verify` формируют одинаковую finding schema.
+- `locus docs verify` и `locus.md verify` формируют одинаковую finding schema.
 - Locus host provider использует task policy Locus, но core не читает `[locus.tasks]`.
 - Standalone mode использует exported snapshot.
 - Отсутствующий Locus host не ломает import core.

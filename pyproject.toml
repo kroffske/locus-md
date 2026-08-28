@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "locus-md"
-version = "0.1.0"
+version = "0.1.1"
 description = "Semantic documentation contracts for Markdown repositories"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -28,6 +28,7 @@ dependencies = ["PyYAML>=6.0", "jsonschema>=4.20", "markdown-it-py>=3.0"]
 dev = ["pytest>=8.0"]
 
 [project.scripts]
+"locus.md" = "locus_md.cli:main"
 locus-md = "locus_md.cli:main"
 
 [project.entry-points."locus_md.providers"]

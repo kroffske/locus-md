@@ -25,4 +25,4 @@ created_by: "example"
 
 ## Notes
 
-Здесь человек или LLM может вести rationale, риски и решения. `locus-md sync` не меняет этот раздел.
+Здесь человек или LLM может вести rationale, риски и решения. `locus.md sync` не меняет этот раздел.

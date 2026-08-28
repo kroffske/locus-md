@@ -128,7 +128,7 @@ class Engine:
                     findings.append(
                         Finding(code="DOC-LOCK-003", message="managed projection has no lock evidence; run sync --write", severity=Severity.INFO,
                                 path=self._display_path(document), line=block.start_line, surface=document.surface, contract_id=name,
-                                remediation=Remediation("command", "locus-md sync --write"))
+                                remediation=Remediation("command", "locus.md sync --write"))
                     )
                 continue
             metadata_matches = (
@@ -149,7 +149,7 @@ class Engine:
                     Finding(code="DOC-BLOCK-020", message="managed block body differs from the last synchronized lock digest", severity=binding.severity,
                             path=self._display_path(document), line=block.start_line, surface=document.surface, contract_id=name,
                             details={"current_body_digest": current_digest, "locked_body_digest": entry.body_digest},
-                            remediation=Remediation("command", "locus-md sync --check"))
+                            remediation=Remediation("command", "locus.md sync --check"))
                 )
         return ScanResult(documents=documents, blocks=blocks, findings=self._strict_findings(findings, force_strict), lock=lock)
 
@@ -291,7 +291,7 @@ class Engine:
                     findings.append(
                         Finding(code="DOC-BLOCK-021", message=f"projection differs from provider snapshot {item.provider}@{snapshot.revision}",
                                 severity=item.binding.severity, path=self._display_path(item.document), line=item.block.start_line,
-                                surface=item.document.surface, contract_id=item.binding.name, remediation=Remediation("command", "locus-md sync --check"))
+                                surface=item.document.surface, contract_id=item.binding.name, remediation=Remediation("command", "locus.md sync --check"))
                     )
                 if mode.startswith("sync"):
                     patches.append(self._projection_patch(item, expected))

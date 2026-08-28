@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from locus_md.cli import main
 
 
@@ -28,3 +30,11 @@ def test_common_options_work_after_subcommand(example_workspace: Path, capsys) -
     payload = json.loads(capsys.readouterr().out)
     assert code == 0
     assert payload["mode"] == "lint"
+
+
+def test_cli_version_uses_primary_command_name(capsys) -> None:
+    with pytest.raises(SystemExit) as exc:
+        main(["--version"])
+
+    assert exc.value.code == 0
+    assert capsys.readouterr().out.strip() == "locus.md 0.1.1"
