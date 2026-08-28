@@ -45,6 +45,16 @@ def test_ambiguous_discovery_is_rejected(tmp_path: Path) -> None:
         discover_config(start=tmp_path)
 
 
+def test_nested_config_owns_its_workspace_inside_parent_git_repo(tmp_path: Path) -> None:
+    (tmp_path / ".git").mkdir()
+    nested = tmp_path / "examples" / "basic"
+    path = write_minimal_workspace(nested)
+
+    config = load_config(explicit=path)
+
+    assert config.workspace_root == nested
+
+
 def test_contract_path_escape_is_rejected(tmp_path: Path) -> None:
     path = write_minimal_workspace(tmp_path)
     with path.open("a", encoding="utf-8") as handle:

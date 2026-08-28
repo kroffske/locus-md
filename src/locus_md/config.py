@@ -64,8 +64,7 @@ def discover_config(*, explicit: str | Path | None = None, start: str | Path | N
 
 def workspace_root_for_config(config_path: Path) -> Path:
     base = config_path.parent.parent if config_path.parent.name == ".locus" else config_path.parent
-    git_root = find_git_root(base)
-    return git_root or base.resolve(strict=False)
+    return base.resolve(strict=False)
 
 
 def _section_kind(section: str) -> tuple[str, str] | None:

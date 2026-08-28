@@ -3,7 +3,7 @@
 This directory is a self-contained design fixture.
 
 ```bash
-cd examples
+cd examples/basic
 locus-md config validate
 locus-md lint
 locus-md verify --offline
