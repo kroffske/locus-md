@@ -1,7 +1,15 @@
 ---
+schema: locus.doc.v1
+id: docs.design.provider-plugin-api
 title: "Locus MD — provider and plugin API"
-status: proposed
-date: "2026-08-27"
+type: system-design
+status: active
+owner: team:locus-md
+tags: [providers, plugins, api]
+updated: "2026-08-28T00:27:14Z"
+source_commit: "6ecd7cfe5fd1"
+update_event: "user_request"
+description: "Проверено и подключено к навигации и dogfood-контракту Locus MD."
 ---
 
 # 1. Цель abstraction

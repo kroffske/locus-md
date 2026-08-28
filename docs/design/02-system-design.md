@@ -1,7 +1,15 @@
 ---
+schema: locus.doc.v1
+id: docs.design.system-design
 title: "Locus MD — system design"
-status: proposed
-date: "2026-08-27"
+type: system-design
+status: active
+owner: team:locus-md
+tags: [architecture, design]
+updated: "2026-08-28T00:27:14Z"
+source_commit: "6ecd7cfe5fd1"
+update_event: "user_request"
+description: "Проверено и подключено к навигации и dogfood-контракту Locus MD."
 ---
 
 # 1. Архитектурный стиль
@@ -27,8 +35,6 @@ Findings + Patches + Lock
 Это не microservice и не набор scripts. Provider plugin может обращаться к API, но orchestration остаётся в одном process.
 
 # 2. System context
-
-См. `diagrams/context.mmd`.
 
 Actors:
 
@@ -65,7 +71,9 @@ Trust boundaries:
 
 ## 3.2. `workspace`
 
-Определяет workspace root, Git root, configured surfaces, file inventory, ignore rules и symlink policy.
+Определяет workspace root от расположения выбранного config, затем строит
+configured surfaces, file inventory, ignore rules и symlink policy. Внешний Git
+root не должен перехватывать вложенное самодостаточное workspace.
 
 ## 3.3. `markdown`
 
@@ -427,7 +435,7 @@ locus-md/
 │   ├── rewrite/
 │   ├── lock/
 │   └── reporting/
-├── schemas/
+├── src/locus_md/schemas/
 ├── docs/
 ├── examples/
 └── tests/
@@ -439,7 +447,7 @@ locus-md/
 
 - Python 3.11+;
 - `markdown-it-py` для Markdown tokens и source maps;
-- `ruamel.yaml` для frontmatter parsing/round-trip fixes;
+- `PyYAML` для frontmatter parsing;
 - `jsonschema` для schemas;
 - stdlib `configparser`, `pathlib`, `hashlib`, `importlib.metadata`.
 

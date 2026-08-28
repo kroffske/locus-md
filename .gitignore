@@ -1,9 +1,16 @@
 __pycache__/
 *.py[cod]
+.DS_Store
 .pytest_cache/
 .venv/
 build/
 dist/
 *.egg-info/
+.tasks/
+.reports/
+.local/
+.locus/*
+!.locus/config.ini
+!.locus/docs.lock.json
 .locus/cache/
 .locus/reports/

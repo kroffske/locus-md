@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://locus-md.invalid/schemas/document.schema.json",
+  "type": "object",
+  "required": ["schema", "id", "title", "type", "status", "owner"],
+  "properties": {
+    "schema": {"const": "locus.doc.v1"},
+    "id": {"type": "string", "minLength": 1},
+    "title": {"type": "string", "minLength": 1},
+    "type": {
+      "type": "string",
+      "enum": ["index", "overview", "guide", "system-design", "prd", "note"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "active", "needs-review", "stale", "deprecated", "archived"]
+    },
+    "owner": {"type": "string", "minLength": 1},
+    "tags": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "updated": {"type": "string"},
+    "source_commit": {"type": "string"},
+    "update_event": {"type": "string"},
+    "description": {"type": "string"}
+  },
+  "additionalProperties": true
+}

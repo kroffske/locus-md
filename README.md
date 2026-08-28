@@ -2,7 +2,7 @@
 
 Locus MD is a standalone semantic documentation linter for Markdown repositories. It keeps authored prose free-form while validating document envelopes, repository links, managed blocks, and deterministic projections against declared providers.
 
-## Implemented in this archive
+## Implemented in 0.1.0
 
 - isolated `[locus.docs*]` INI configuration;
 - configurable documentation surfaces;
@@ -44,4 +44,8 @@ Provider, selector, schema, mode, and renderer remain in the tracked INI contrac
 
 ## Status
 
-This is a runnable alpha/MVP implementation. Remote GitHub and Linear adapters, SARIF, changed-files mode, and bidirectional synchronization are intentionally outside this archive.
+This is a runnable alpha/MVP implementation. The repository dogfoods its own
+contract through `.locus/config.ini`; run `locus-md lint`, `locus-md verify
+--offline`, and `locus-md sync --check --offline` from the repository root.
+Remote GitHub and Linear adapters, SARIF, changed-files mode, and bidirectional
+synchronization remain intentionally out of scope.

@@ -1,0 +1,18 @@
+{
+  "contracts": {
+    "implementation-status": {
+      "block_id": "dogfood",
+      "block_kind": "milestone",
+      "body_digest": "sha256:5103cdf877f04c5d404cf6dd6be8a1a821746643920f8a1069c3c790b99e2774",
+      "contract_schema": "task-table.v1",
+      "path": "implementation-status.md",
+      "provider": "project-status",
+      "provider_revision": "sha256:2f4b24ef13e7a35a843ce7e0099978fac3e1f3c387258605dba6f5ada39b2ed9",
+      "renderer": "task-table.v1",
+      "snapshot_digest": "sha256:04c1bcd42c2ab26fdf6bc4e44e30a4205afbfe60372f1a2a228c230eef9e2317",
+      "surface": "docs",
+      "synced_at": "2026-08-28T00:28:03Z"
+    }
+  },
+  "schema": "locus-md.lock.v1"
+}

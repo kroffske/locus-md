@@ -1,0 +1,49 @@
+{
+  "schema": "locus-md.entities.v1",
+  "records": [
+    {
+      "kind": "task",
+      "id": "MD-001",
+      "revision": "1",
+      "fields": {
+        "title": "Создать самостоятельный Python-пакет и CLI",
+        "status": "done",
+        "milestone": "dogfood"
+      },
+      "url": null
+    },
+    {
+      "kind": "task",
+      "id": "MD-002",
+      "revision": "1",
+      "fields": {
+        "title": "Проверять Markdown-поверхности и ссылки",
+        "status": "done",
+        "milestone": "dogfood"
+      },
+      "url": null
+    },
+    {
+      "kind": "task",
+      "id": "MD-003",
+      "revision": "1",
+      "fields": {
+        "title": "Проверять и синхронизировать managed blocks",
+        "status": "done",
+        "milestone": "dogfood"
+      },
+      "url": null
+    },
+    {
+      "kind": "task",
+      "id": "MD-004",
+      "revision": "1",
+      "fields": {
+        "title": "Подключить контракт к репозиторию Locus MD",
+        "status": "done",
+        "milestone": "dogfood"
+      },
+      "url": null
+    }
+  ]
+}

@@ -1,7 +1,15 @@
 ---
+schema: locus.doc.v1
+id: docs.design.cli-and-diagnostics
 title: "Locus MD — CLI and diagnostics"
-status: proposed
-date: "2026-08-27"
+type: guide
+status: active
+owner: team:locus-md
+tags: [cli, diagnostics]
+updated: "2026-08-28T00:27:14Z"
+source_commit: "6ecd7cfe5fd1"
+update_event: "user_request"
+description: "Проверено и подключено к навигации и dogfood-контракту Locus MD."
 ---
 
 # 1. Командная модель
