@@ -1,7 +1,7 @@
 ---
 schema: locus.doc.v1
 id: docs.design.document-contract-model
-title: "Locus MD — document contract model"
+title: "locus-md — document contract model"
 type: system-design
 status: active
 owner: team:locus-md
@@ -9,12 +9,12 @@ tags: [contracts, design]
 updated: "2026-08-28T00:27:14Z"
 source_commit: "6ecd7cfe5fd1"
 update_event: "user_request"
-description: "Validated and connected to Locus MD navigation and self-validation contracts."
+description: "Validated and connected to locus-md navigation and self-validation contracts."
 ---
 
 # 1. Scope model
 
-Locus MD validates four levels.
+locus-md validates four levels.
 
 ## 1.1. Envelope
 

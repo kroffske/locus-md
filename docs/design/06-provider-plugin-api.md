@@ -1,7 +1,7 @@
 ---
 schema: locus.doc.v1
 id: docs.design.provider-plugin-api
-title: "Locus MD — provider and plugin API"
+title: "locus-md — provider and plugin API"
 type: system-design
 status: active
 owner: team:locus-md
@@ -9,7 +9,7 @@ tags: [providers, plugins, api]
 updated: "2026-08-28T00:27:14Z"
 source_commit: "6ecd7cfe5fd1"
 update_event: "user_request"
-description: "Validated and connected to Locus MD navigation and self-validation contracts."
+description: "Validated and connected to locus-md navigation and self-validation contracts."
 ---
 
 # 1. Provider responsibility

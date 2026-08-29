@@ -3,15 +3,15 @@
     "implementation-status": {
       "block_id": "dogfood",
       "block_kind": "milestone",
-      "body_digest": "sha256:e389407a94b681d86a648a36175631b3f4b80038d638d4204b45ac77497e2f91",
+      "body_digest": "sha256:e8bb465b1e1e0ccf797edad88cb5e67ea6f354b804b35430dd3a21c2e8759156",
       "contract_schema": "task-table.v1",
       "path": "implementation-status.md",
       "provider": "project-status",
-      "provider_revision": "sha256:b014878965f5bcf9cae66a08c91c49c380436453684492a6565c48d3c5608643",
+      "provider_revision": "sha256:f908fb5f13581894593d677952924c68885c52297c81dd66cdab9b684ac06005",
       "renderer": "task-table.v1",
-      "snapshot_digest": "sha256:b359f0ef01e4a651413403f5ca0135db93903e543a553bccb0dcd1a6a33a81b3",
+      "snapshot_digest": "sha256:3f061f6b4573ad170f11bc3091d768b1e025c9836fb836326ce5cccd2c9242e1",
       "surface": "docs",
-      "synced_at": "2026-08-28T00:59:44Z"
+      "synced_at": "2026-08-29T21:44:11Z"
     }
   },
   "schema": "locus-md.lock.v1"

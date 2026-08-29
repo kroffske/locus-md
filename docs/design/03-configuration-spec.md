@@ -1,7 +1,7 @@
 ---
 schema: locus.doc.v1
 id: docs.design.configuration
-title: "Locus MD — INI configuration specification"
+title: "locus-md — INI configuration specification"
 type: guide
 status: active
 owner: team:locus-md
@@ -9,12 +9,12 @@ tags: [configuration, contract]
 updated: "2026-08-28T00:27:14Z"
 source_commit: "6ecd7cfe5fd1"
 update_event: "user_request"
-description: "Validated and connected to Locus MD navigation and self-validation contracts."
+description: "Validated and connected to locus-md navigation and self-validation contracts."
 ---
 
 # 1. Purpose
 
-Locus MD runs as a standalone CLI or an embedded library. A repository may use
+locus-md runs as a standalone CLI or an embedded library. A repository may use
 one shared project INI file. The documentation contract never depends on values
 from unrelated sections.
 
@@ -60,7 +60,7 @@ schema = 1
 surfaces = docs
 ```
 
-Standalone `locus.md` sees only `locus.docs*`.
+Standalone `locus-md` sees only `locus.docs*`.
 
 # 4. Syntax rules
 
@@ -246,7 +246,7 @@ strictness. They never change provider, mode, selector, or renderer semantics.
 
 # 12. Configuration editing
 
-`locus.md init` creates `.locus/config.ini` when missing or adds only absent
+`locus-md init` creates `.locus/config.ini` when missing or adds only absent
 `locus.docs*` sections. It does not reformat the complete INI. `--check` and
 `--print` provide non-writing modes.
 

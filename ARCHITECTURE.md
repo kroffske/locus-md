@@ -1,6 +1,6 @@
 # Architecture
 
-Locus MD is a library-first modular monolith. The execution path is:
+locus-md is a library-first modular monolith. The execution path is:
 
 ```text
 CLI / Python API

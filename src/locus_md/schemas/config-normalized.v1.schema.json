@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.locus-md.dev/config-normalized.v1.schema.json",
-  "title": "Locus MD Normalized Config v1",
+  "title": "locus-md Normalized Config v1",
   "type": "object",
   "required": [
     "schema",

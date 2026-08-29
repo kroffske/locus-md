@@ -1,11 +1,11 @@
-# Locus MD
+# locus-md
 
 This file is the single repository contract for agents. A nested `AGENTS.md`
 may add rules only for its own directory.
 
 ## Purpose
 
-Locus MD is a standalone Python library and CLI for deterministic semantic
+locus-md is a standalone Python library and CLI for deterministic semantic
 contracts over Markdown. Authored prose remains free-form. The tool validates
 document structure, link graphs, and managed data projections.
 
@@ -19,10 +19,10 @@ Verification commands:
 ```bash
 .venv/bin/python -m pytest
 PATH="$PWD/.venv/bin:$PATH" make example
-.venv/bin/locus.md config validate
-.venv/bin/locus.md lint
-.venv/bin/locus.md verify --offline
-.venv/bin/locus.md sync --check --offline
+.venv/bin/locus-md config validate
+.venv/bin/locus-md lint
+.venv/bin/locus-md verify --offline
+.venv/bin/locus-md sync --check --offline
 ```
 
 Install the global tool with `uv tool install --force .`. Build a wheel with
@@ -30,12 +30,12 @@ Install the global tool with `uv tool install --force .`. Build a wheel with
 
 Optional host metadata is separate from the product. If this checkout uses
 Locus project memory, run `locus init` to regenerate its private
-`.locus/AGENTS.md` registry. Locus MD never reads that registry.
+`.locus/AGENTS.md` registry. locus-md never reads that registry.
 
 ## Change rules
 
 - `src/locus_md/` must not import a host application, remote tracker, or concrete task store.
-- Locus MD reads only `[locus.docs*]` sections from a shared INI file.
+- locus-md reads only `[locus.docs*]` sections from a shared INI file.
 - A managed-block update must preserve every byte outside its span.
 - Every new provider or contract failure requires a stable finding code and a test.
 - `dist/` contains a saved build snapshot. Treat it as current only after a new installation check.
@@ -62,12 +62,12 @@ Locus project memory, run `locus init` to regenerate its private
 | `examples/` | Self-contained workspaces for acceptance checks | tracked |
 | `schemas/` | JSON Schema for this repository's documentation | tracked |
 | `data/` | Normalized sources used by self-validation contracts | tracked |
-| `.locus/config.ini` | Tracked Locus MD contract manifest | tracked |
+| `.locus/config.ini` | Tracked locus-md contract manifest | tracked |
 | `.locus/docs.lock.json` | Reproducible evidence of the last materialization | tracked |
 | `.locus/soul.md` | Local product identity and durable direction | local |
 | `.tasks/` | Local task workspaces and evidence | local |
 | `.venv/` | Local Python environment | local |
-| `dist/` | Saved wheel from the original release snapshot | tracked |
+| `dist/` | Current saved wheel snapshot | tracked |
 | `.github/` | CI workflow for Python 3.11–3.13 | tracked |
 <!-- locus:nav:v1:end -->
 </navigation>

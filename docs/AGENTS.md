@@ -1,15 +1,15 @@
 ---
-title: Locus MD Documentation Rules
+title: locus-md Documentation Rules
 type: guide
 status: active
 owner: team:locus-md
 tags: [documentation, authoring]
 ---
 
-# Locus MD Documentation
+# locus-md Documentation
 
 This file is the local contract for documentation changes. Keep each page
-self-contained, link it from the public index, and verify it with `locus.md`.
+self-contained, link it from the public index, and verify it with `locus-md`.
 
 Reading order:
 
@@ -20,4 +20,4 @@ Reading order:
 5. `implementation-status.md` — current implemented surface.
 
 `docs/index.md` remains the single public entry point. Add every new page to
-the index in the same change. Locus MD validates frontmatter and links.
+the index in the same change. locus-md validates frontmatter and links.

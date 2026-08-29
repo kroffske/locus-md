@@ -9,7 +9,7 @@ tags: [implementation, dogfood]
 updated: "2026-08-28T00:27:13Z"
 source_commit: "6ecd7cfe5fd1"
 update_event: "user_request"
-description: "Validated and connected to Locus MD navigation and self-validation contracts."
+description: "Validated and connected to locus-md navigation and self-validation contracts."
 ---
 
 # Implementation status
@@ -26,8 +26,8 @@ never rewrites the authored text outside the markers.
 | MD-001 | Create the standalone Python package and CLI | done |
 | MD-002 | Validate Markdown surfaces and links | done |
 | MD-003 | Validate and synchronize managed blocks | done |
-| MD-004 | Apply a document contract to the Locus MD repository | done |
-| MD-005 | Install locus.md globally with uv tool | done |
+| MD-004 | Apply a document contract to the locus-md repository | done |
+| MD-005 | Install locus-md globally with uv tool | done |
 <!-- locus:milestone dogfood end -->
 
 ## Deliberately deferred

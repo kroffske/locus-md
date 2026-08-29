@@ -1,4 +1,4 @@
-"""Locus MD public package."""
+"""locus-md public package."""
 
 from .api import load_workspace, lint, sync, verify
 

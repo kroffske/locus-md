@@ -39,7 +39,7 @@
       "id": "MD-004",
       "revision": "1",
       "fields": {
-        "title": "Apply a document contract to the Locus MD repository",
+        "title": "Apply a document contract to the locus-md repository",
         "status": "done",
         "milestone": "dogfood"
       },
@@ -50,7 +50,7 @@
       "id": "MD-005",
       "revision": "1",
       "fields": {
-        "title": "Install locus.md globally with uv tool",
+        "title": "Install locus-md globally with uv tool",
         "status": "done",
         "milestone": "dogfood"
       },

@@ -1,6 +1,6 @@
-# Locus MD
+# locus-md
 
-Locus MD is a standalone semantic documentation linter for Markdown repositories. It keeps authored prose free-form while validating document envelopes, repository links, managed blocks, and deterministic projections against declared providers.
+locus-md is a standalone semantic documentation linter for Markdown repositories. It keeps authored prose free-form while validating document envelopes, repository links, managed blocks, and deterministic projections against declared providers.
 
 ## Implemented in 0.1.0
 
@@ -22,16 +22,15 @@ Locus MD is a standalone semantic documentation linter for Markdown repositories
 ```bash
 uv tool install .
 cd examples/basic
-locus.md config validate
-locus.md lint
-locus.md verify --offline
-locus.md sync --check --offline
+locus-md config validate
+locus-md lint
+locus-md verify --offline
+locus-md sync --check --offline
 ```
 
-The default discovery path is `.locus/config.ini`. A shared INI may contain unrelated Locus sections; Locus MD reads only its own namespace.
+The default discovery path is `.locus/config.ini`. A shared INI may contain unrelated Locus sections; locus-md reads only its own namespace.
 
-`locus.md` is the primary standalone command. `locus-md` remains available as
-a compatibility alias. Neither command routes through the `locus` CLI.
+`locus-md` is the standalone command. It does not route through the `locus` CLI.
 
 ## Managed block
 
@@ -48,7 +47,7 @@ Provider, selector, schema, mode, and renderer remain in the tracked INI contrac
 ## Status
 
 This is a runnable alpha/MVP implementation. The repository dogfoods its own
-contract through `.locus/config.ini`; run `locus.md lint`, `locus.md verify
---offline`, and `locus.md sync --check --offline` from the repository root.
+contract through `.locus/config.ini`; run `locus-md lint`, `locus-md verify
+--offline`, and `locus-md sync --check --offline` from the repository root.
 Remote GitHub and Linear adapters, SARIF, changed-files mode, and bidirectional
 synchronization remain intentionally out of scope.

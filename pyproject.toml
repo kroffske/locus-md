@@ -9,7 +9,7 @@ description = "Semantic documentation contracts for Markdown repositories"
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
-authors = [{name = "Locus MD contributors"}]
+authors = [{name = "locus-md contributors"}]
 keywords = ["markdown", "documentation", "linter", "contracts", "docs-as-code"]
 classifiers = [
   "Development Status :: 3 - Alpha",
@@ -28,7 +28,6 @@ dependencies = ["PyYAML>=6.0", "jsonschema>=4.20", "markdown-it-py>=3.0"]
 dev = ["pytest>=8.0"]
 
 [project.scripts]
-"locus.md" = "locus_md.cli:main"
 locus-md = "locus_md.cli:main"
 
 [project.entry-points."locus_md.providers"]

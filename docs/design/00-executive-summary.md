@@ -1,7 +1,7 @@
 ---
 schema: locus.doc.v1
 id: docs.design.executive-summary
-title: "Locus MD — executive summary"
+title: "locus-md — executive summary"
 type: overview
 status: active
 owner: team:locus-md
@@ -9,15 +9,15 @@ tags: [product, overview]
 updated: "2026-08-28T00:27:14Z"
 source_commit: "6ecd7cfe5fd1"
 update_event: "user_request"
-description: "Validated and connected to Locus MD navigation and self-validation contracts."
+description: "Validated and connected to locus-md navigation and self-validation contracts."
 ---
 
 # 1. Product decision
 
-Locus MD is a standalone package that installs and runs without another host
+locus-md is a standalone package that installs and runs without another host
 application.
 
-> Locus MD validates not only Markdown form, but also whether declared document
+> locus-md validates not only Markdown form, but also whether declared document
 > projections match their data sources. Authored text outside managed regions
 > remains unchanged.
 
@@ -27,7 +27,7 @@ systems:
 ```text
 Markdown style / prose / links
                 ↓
-       Locus MD contracts
+       locus-md contracts
                 ↓
 files / JSON / Git / remote trackers / custom providers
 ```
@@ -62,7 +62,7 @@ or individual contract files.
 ## 3.2. One shared INI file
 
 The default path is `.locus/config.ini`; `--config` accepts another path.
-Locus MD reads only these namespaces:
+locus-md reads only these namespaces:
 
 ```text
 [locus.docs]
@@ -114,7 +114,7 @@ host adapter
 ```
 
 The core never imports a host application. A host may call the public Python
-API, register providers, or run `locus.md` as a subprocess.
+API, register providers, or run `locus-md` as a subprocess.
 
 # 4. First release boundary
 

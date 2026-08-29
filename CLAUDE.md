@@ -1,4 +1,4 @@
-# Locus MD
+# locus-md
 
 @./AGENTS.md
 

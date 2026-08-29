@@ -25,4 +25,4 @@ The milestone goal is authored prose and is not generated from a task tracker.
 
 ## Notes
 
-An author or LLM can record rationale, risks, and decisions here. `locus.md sync` does not change this section.
+An author or LLM can record rationale, risks, and decisions here. `locus-md sync` does not change this section.

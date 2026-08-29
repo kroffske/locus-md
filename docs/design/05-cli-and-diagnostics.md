@@ -1,7 +1,7 @@
 ---
 schema: locus.doc.v1
 id: docs.design.cli-and-diagnostics
-title: "Locus MD — CLI and diagnostics"
+title: "locus-md — CLI and diagnostics"
 type: guide
 status: active
 owner: team:locus-md
@@ -9,35 +9,35 @@ tags: [cli, diagnostics]
 updated: "2026-08-28T00:27:14Z"
 source_commit: "6ecd7cfe5fd1"
 update_event: "user_request"
-description: "Validated and connected to Locus MD navigation and self-validation contracts."
+description: "Validated and connected to locus-md navigation and self-validation contracts."
 ---
 
 # 1. Command model
 
-## `locus.md init`
+## `locus-md init`
 
 Creates a new namespaced configuration scaffold or adds missing documentation
 sections.
 
 ```bash
-locus.md init
-locus.md init --config .locus/config.ini --check
-locus.md init --print
+locus-md init
+locus-md init --config .locus/config.ini --check
+locus-md init --print
 ```
 
-## `locus.md config validate`
+## `locus-md config validate`
 
 Validates discovery, namespace isolation, types, paths, and plugin references.
 
 ```bash
-locus.md config validate
-locus.md config show
+locus-md config validate
+locus-md config show
 ```
 
-`config show` returns the normalized Locus MD model and excludes unrelated INI
+`config show` returns the normalized locus-md model and excludes unrelated INI
 sections.
 
-## `locus.md lint`
+## `locus-md lint`
 
 Runs static checks only:
 
@@ -50,50 +50,50 @@ Runs static checks only:
 It never opens a network provider.
 
 ```bash
-locus.md lint
-locus.md lint --surface docs
-locus.md lint --format json
+locus-md lint
+locus-md lint --surface docs
+locus-md lint --format json
 ```
 
-## `locus.md verify`
+## `locus-md verify`
 
 Adds provider-backed assertions.
 
 ```bash
-locus.md verify
-locus.md verify --offline
-locus.md verify --provider tasks
+locus-md verify
+locus-md verify --offline
+locus-md verify --provider tasks
 ```
 
 `--provider` filters contracts. It never changes the provider declared in
 configuration.
 
-## `locus.md sync --check`
+## `locus-md sync --check`
 
 Builds canonical projections without writing.
 
 ```bash
-locus.md sync --check --offline
+locus-md sync --check --offline
 ```
 
 Human output includes a summary and unified diff. JSON output includes patches.
 
-## `locus.md sync --write`
+## `locus-md sync --write`
 
 Applies deterministic patches and updates lock evidence.
 
 ```bash
-locus.md sync --write --offline
+locus-md sync --write --offline
 ```
 
 No sync command writes unless `--write` is present.
 
-## `locus.md contracts list`
+## `locus-md contracts list`
 
 Lists configured bindings, discovered blocks, providers, schema and renderer,
 and lock state.
 
-## `locus.md doctor`
+## `locus-md doctor`
 
 Reports Python, platform, selected configuration, workspace, writability,
 provider plugins, contract plugins, and plugin-load errors. It is an environment
@@ -106,7 +106,7 @@ Human example:
 ```text
 ERROR DOC-BLOCK-021 docs/milestones.md:14
   Projection differs from the current provider snapshot.
-  Run: locus.md sync --check
+  Run: locus-md sync --check
 ```
 
 JSON reports follow the packaged `report.v1.schema.json`:
@@ -202,17 +202,17 @@ internal-error
 Offline validation:
 
 ```bash
-locus.md config validate
-locus.md lint
-locus.md verify --offline
-locus.md sync --check --offline
+locus-md config validate
+locus-md lint
+locus-md verify --offline
+locus-md sync --check --offline
 ```
 
 Network-enabled validation:
 
 ```bash
-locus.md verify --network
-locus.md sync --check --network
+locus-md verify --network
+locus-md sync --check --network
 ```
 
 Network access must be explicitly permitted when `network=explicit`.
@@ -236,7 +236,7 @@ A finding may include deterministic remediation:
 {
   "remediation": {
     "kind": "command",
-    "value": "locus.md sync --check"
+    "value": "locus-md sync --check"
   }
 }
 ```

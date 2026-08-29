@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.locus-md.dev/provider-snapshot.v1.schema.json",
-  "title": "Locus MD Provider Snapshot v1",
+  "title": "locus-md Provider Snapshot v1",
   "type": "object",
   "required": [
     "schema",

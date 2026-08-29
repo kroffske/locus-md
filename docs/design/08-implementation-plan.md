@@ -1,7 +1,7 @@
 ---
 schema: locus.doc.v1
 id: docs.design.implementation-plan
-title: "Locus MD — implementation plan"
+title: "locus-md — implementation plan"
 type: note
 status: needs-review
 owner: team:locus-md
@@ -9,7 +9,7 @@ tags: [plan, roadmap]
 updated: "2026-08-28T00:27:14Z"
 source_commit: "6ecd7cfe5fd1"
 update_event: "user_request"
-description: "Validated and connected to Locus MD navigation and self-validation contracts."
+description: "Validated and connected to locus-md navigation and self-validation contracts."
 ---
 
 # 1. Delivery strategy
@@ -37,7 +37,7 @@ Create a standalone repository and fix the public boundaries.
 
 ## Acceptance
 
-- `uv tool install .` and `locus.md --help` work.
+- `uv tool install .` and `locus-md --help` work.
 - Schemas are present in the wheel.
 - The example passes `config validate`.
 - CI builds and tests the package.
@@ -143,8 +143,8 @@ Make installation, upgrade, and self-validation reliable without another CLI.
 | ID | Task |
 |---|---|
 | MD-401 | Global `uv tool` installation |
-| MD-402 | Canonical `locus.md` executable |
-| MD-403 | Compatibility alias |
+| MD-402 | Canonical `locus-md` executable |
+| MD-403 | Single executable contract |
 | MD-404 | Wheel entry-point verification |
 | MD-405 | Packaged-schema verification |
 | MD-406 | Self-validation contract |
@@ -152,10 +152,10 @@ Make installation, upgrade, and self-validation reliable without another CLI.
 
 ## Acceptance
 
-- `uv tool install .` exposes `locus.md` globally.
+- `uv tool install .` exposes `locus-md` globally.
 - The globally installed tool validates this repository and the nested example.
 - Explicit and discovered configuration resolve the same workspace.
-- The wheel contains both executable entry points and all schemas.
+- The wheel contains the `locus-md` executable entry point and all schemas.
 
 # 7. Milestone M5 — ecosystem hardening
 
