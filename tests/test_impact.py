@@ -129,14 +129,20 @@ def test_impact_nested_workspace_uses_workspace_relative_coordinates(tmp_path: P
     _git(tmp_path, "init", "-q")
     nested = tmp_path / "packages" / "docs"
     config_path = _seed_repo(nested, init_git=False)
+    outside = tmp_path / "outside.md"
+    outside.write_text("outside\n", encoding="utf-8")
     _git(tmp_path, "add", "packages/docs")
+    _git(tmp_path, "add", "outside.md")
     _git(tmp_path, "-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-qm", "nested-base")
     document = nested / "docs" / "guide.md"
     document.write_text(document.read_text(encoding="utf-8") + "Changed.\n", encoding="utf-8")
+    outside.write_text("outside changed\n", encoding="utf-8")
     config = load_config(explicit=config_path)
     report = build_impact(config, "HEAD", Engine(config).scan().documents.values())
     row = next(change for change in report.changes if change.path == "docs/guide.md")
     assert row.path != "packages/docs/docs/guide.md"
+    assert all("outside.md" not in change.path for change in report.changes)
+    assert all(not change.old_path or "outside.md" not in change.old_path for change in report.changes)
 
 
 def test_impact_flags_canonical_configuration_change_and_invalid_base_is_typed(tmp_path: Path) -> None:

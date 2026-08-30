@@ -37,7 +37,9 @@ check. Renames include both old and new paths.
 The report sets `configuration_changed = true` when `.locus/locus-md.toml`
 itself changed. It does not reconstruct a historical configuration or pretend
 to know dependents that existed only under a removed surface. Paths are shown
-relative to the locus-md workspace, including nested workspaces.
+relative to the locus-md workspace, including nested workspaces. Git changes
+outside a nested workspace are filtered out so every emitted `path` and
+`old_path` uses that one coordinate system.
 
 JSON output uses `locus-md.impact.v1`. An invalid Git ref is a typed Git error.
 An empty report means Git found no changes in the selected change set. It is not

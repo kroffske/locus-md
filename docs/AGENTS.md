@@ -20,10 +20,11 @@ against the standalone CLI.
 2. [Configuration](configuration.md) — define surfaces and discovery.
 3. [Document model](document-model.md) — declare documents, sections, and metadata.
 4. [Rules and plug-ins](rules-and-plugins.md) — understand built-ins, providers, and adapters.
-5. [Change impact](change-impact.md) — review changed or deleted documents.
-6. [CLI reference](cli.md) — find exact commands, output, and exit behavior.
-7. [System design](system-design/locus-md/locus-md.md) — inspect ownership and boundaries.
-8. [Implementation status](implementation-status.md) — read the current dogfood snapshot.
+5. [Plug-in API](plugin-api.md) — implement providers, contracts, and rules safely.
+6. [Change impact](change-impact.md) — review changed or deleted documents.
+7. [CLI reference](cli.md) — find exact commands, output, and exit behavior.
+8. [System design](system-design/locus-md/locus-md.md) — inspect ownership and boundaries.
+9. [Implementation status](implementation-status.md) — read the current dogfood snapshot.
 
 `locus-md` validates front matter, links, reachability, managed blocks, and
 declared documents. The generic `locus docs` command validates this

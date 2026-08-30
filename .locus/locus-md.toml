@@ -122,6 +122,17 @@ heading = "1. Built-in checks"
 required = true
 guidance = "Describe deterministic checks that need no installed plug-in."
 
+[locus-md.document.plugin-api]
+surface = "docs"
+path = "plugin-api.md"
+description = "Source-backed provider, contract, rule, entry-point, and trust API."
+guidance = "Keep extension protocols and the in-process trust boundary synchronized with source."
+
+[locus-md.document.plugin-api.sections.register]
+heading = "Register an extension"
+required = true
+guidance = "Show entry-point groups, API versioning, and registration behavior."
+
 [locus-md.document.change-impact]
 surface = "docs"
 path = "change-impact.md"

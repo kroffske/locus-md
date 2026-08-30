@@ -23,6 +23,7 @@ when a real integration needs them.
 ## Extend the contract
 
 - [Rules and plug-ins](rules-and-plugins.md) — separate built-ins, TOML, providers, contracts, and Python rules.
+- [Plug-in API](plugin-api.md) — source-backed provider, contract, rule, and trust contracts.
 - [Change impact](change-impact.md) — see which documents may need review after a Git change.
 - [CLI reference](cli.md) — commands, formats, permissions, and exit codes.
 

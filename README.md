@@ -106,7 +106,9 @@ language.
 Installed Python packages can add providers, contract handlers, or read-only
 rules through `locus_md.providers`, `locus_md.contracts`, or `locus_md.rules`.
 An `adapter` names an installed entry point. It is not inline code or a network
-endpoint. See [Rules and plug-ins](docs/rules-and-plugins.md).
+endpoint. Plug-ins are trusted in-process Python and are not OS-sandboxed;
+their rule protocol has no core patch API. See [Rules and plug-ins](docs/rules-and-plugins.md)
+and the [Plug-in API](docs/plugin-api.md).
 
 `network` controls provider I/O only. Guidance is authoring data for a human or
 LLM; it cannot change findings or pass/fail state. There is no automatic prose

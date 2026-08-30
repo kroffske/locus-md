@@ -183,6 +183,38 @@ custom = true
         load_config(explicit=config_path)
 
 
+def test_surface_unknown_keys_are_rejected(tmp_path: Path) -> None:
+    config_path = write_minimal_workspace(tmp_path)
+    config_path.write_text(config_path.read_text(encoding="utf-8").replace('include = ["**/*.md"]', 'include = ["**/*.md"]\ntypo = true'), encoding="utf-8")
+    with pytest.raises(ConfigError, match="CFG-063"):
+        load_config(explicit=config_path)
+
+
+def test_contract_unknown_keys_are_rejected_while_provider_options_stay_open(tmp_path: Path) -> None:
+    config_path = write_minimal_workspace(tmp_path)
+    config_path.write_text(config_path.read_text(encoding="utf-8") + '''
+[locus-md.provider.tasks]
+adapter = "file-json"
+custom_option = "kept"
+
+[locus-md.contract.tasks]
+surface = "docs"
+path = "index.md"
+block_kind = "milestone"
+block_id = "tasks"
+schema = "task-table.v1"
+mode = "snapshot"
+typo = "rejected"
+''', encoding="utf-8")
+    with pytest.raises(ConfigError, match="CFG-064"):
+        load_config(explicit=config_path)
+
+    valid = config_path.read_text(encoding="utf-8").replace('\ntypo = "rejected"', "")
+    config_path.write_text(valid, encoding="utf-8")
+    config = load_config(explicit=config_path)
+    assert config.providers["tasks"].options == {"custom_option": "kept"}
+
+
 def test_init_is_create_only_and_idempotent(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
     assert main(["init"]) == 0

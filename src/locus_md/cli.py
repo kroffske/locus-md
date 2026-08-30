@@ -68,7 +68,7 @@ def _config_validate(args: argparse.Namespace, registry: PluginRegistry) -> int:
     payload = {
         "state": "passed", "config_path": str(config.config_path), "workspace_root": str(config.workspace_root),
         "config_digest": config.config_digest, "surfaces": sorted(config.surfaces), "providers": sorted(config.providers),
-        "contracts": sorted(config.contracts), "rules": sorted(config.rules),
+        "contracts": sorted(config.contracts), "rules": sorted(config.rules), "documents": sorted(config.documents),
     }
     if args.format == "json":
         print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
@@ -76,7 +76,7 @@ def _config_validate(args: argparse.Namespace, registry: PluginRegistry) -> int:
         print(f"Configuration OK: {config.config_path}")
         print(
             f"workspace={config.workspace_root} surfaces={len(config.surfaces)} providers={len(config.providers)} "
-            f"contracts={len(config.contracts)} rules={len(config.rules)}"
+            f"contracts={len(config.contracts)} rules={len(config.rules)} documents={len(config.documents)}"
         )
     return 0
 

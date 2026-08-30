@@ -49,6 +49,8 @@ rules execute during `verify` and during both `sync --check` and
 The same entry-point model supports `locus_md.providers` and
 `locus_md.contracts`. A provider obtains source facts. A contract handler
 validates or renders a managed block. Neither owns document declarations.
+The complete method-level contract and trust boundary are in
+[Plug-in API](plugin-api.md).
 
 ## Managed blocks and providers
 

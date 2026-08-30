@@ -40,8 +40,10 @@ Providers obtain normalized source facts. Contract handlers validate or render
 managed blocks. Rules are installed Python code selected by an `adapter` name.
 Configured rules execute during `verify` and both synchronization flows, but
 not during static `lint`. The core validates plug-in output and orders
-findings; it does not let a plug-in write files or turn guidance into
-validation logic.
+findings; the rule protocol has no core patch API. Plug-ins are trusted
+in-process Python code, not OS-sandboxed processes, so this protocol boundary
+does not prevent a plug-in from performing its own file or network I/O. See
+[the plug-in API](../../plugin-api.md) for the complete contract.
 
 ## Write boundary
 

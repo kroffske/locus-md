@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from locus_md.cli import main
+from locus_md.config import load_config
 
 
 def test_cli_config_validate_json(example_workspace: Path, capsys) -> None:
@@ -14,6 +15,16 @@ def test_cli_config_validate_json(example_workspace: Path, capsys) -> None:
     assert code == 0
     payload = json.loads(captured.out)
     assert payload["state"] == "passed"
+    assert isinstance(payload["documents"], list)
+    assert payload["documents"] == sorted(payload["documents"])
+
+
+def test_cli_config_validate_human_includes_document_count(example_workspace: Path, capsys) -> None:
+    code = main(["--config", str(example_workspace / ".locus" / "locus-md.toml"), "config", "validate"])
+    output = capsys.readouterr().out
+    assert code == 0
+    config = load_config(explicit=example_workspace / ".locus" / "locus-md.toml")
+    assert f"documents={len(config.documents)}" in output
 
 
 def test_cli_sync_check_exit_code(example_workspace: Path, capsys) -> None:

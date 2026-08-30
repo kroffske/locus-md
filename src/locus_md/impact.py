@@ -86,9 +86,7 @@ def _changes(workspace: Path, base: str) -> list[tuple[str, str, str | None]]:
 
 def _workspace_path(repo_root: Path, workspace: Path, repo_path: str) -> str:
     absolute = (repo_root / repo_path).resolve(strict=False)
-    if is_inside(absolute, workspace):
-        return absolute.relative_to(workspace.resolve()).as_posix()
-    return repo_path.replace("\\", "/")
+    return absolute.relative_to(workspace.resolve()).as_posix()
 
 
 def _classify(config: WorkspaceConfig, absolute: Path, repo_path: str) -> tuple[bool, str | None, str | None]:
@@ -116,8 +114,12 @@ def build_impact(config: WorkspaceConfig, base: str, documents: Iterable[Documen
     rows: list[ImpactChange] = []
     for status, path, old_path in changes:
         absolute = repo_root / path
-        managed, surface, document = _classify(config, absolute, path)
         old_absolute = repo_root / old_path if old_path else None
+        if not is_inside(absolute.resolve(strict=False), config.workspace_root):
+            continue
+        if old_absolute is not None and not is_inside(old_absolute.resolve(strict=False), config.workspace_root):
+            continue
+        managed, surface, document = _classify(config, absolute, path)
         if old_absolute is not None:
             old_managed, old_surface, old_document = _classify(config, old_absolute, old_path or "")
             managed = managed or old_managed
