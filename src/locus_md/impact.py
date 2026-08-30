@@ -115,18 +115,23 @@ def build_impact(config: WorkspaceConfig, base: str, documents: Iterable[Documen
     for status, path, old_path in changes:
         absolute = repo_root / path
         old_absolute = repo_root / old_path if old_path else None
-        if not is_inside(absolute.resolve(strict=False), config.workspace_root):
+        current_inside = is_inside(absolute.resolve(strict=False), config.workspace_root)
+        old_inside = old_absolute is not None and is_inside(old_absolute.resolve(strict=False), config.workspace_root)
+        if not current_inside and not old_inside:
             continue
-        if old_absolute is not None and not is_inside(old_absolute.resolve(strict=False), config.workspace_root):
-            continue
+        crossing_boundary = old_absolute is not None and current_inside != old_inside
+        if crossing_boundary and current_inside:
+            status, path, old_path, absolute = "added", path, None, absolute
+        elif crossing_boundary:
+            assert old_absolute is not None
+            status, path, old_path, absolute = "deleted", old_path or "", None, old_absolute
         managed, surface, document = _classify(config, absolute, path)
-        if old_absolute is not None:
+        dependents = set(reverse.get(absolute.resolve(strict=False), ()))
+        if old_absolute is not None and not crossing_boundary:
             old_managed, old_surface, old_document = _classify(config, old_absolute, old_path or "")
             managed = managed or old_managed
             surface = surface or old_surface
             document = document or old_document
-        dependents = set(reverse.get(absolute.resolve(strict=False), ()))
-        if old_absolute is not None:
             dependents.update(reverse.get(old_absolute.resolve(strict=False), ()))
         rows.append(ImpactChange(status=status, path=_workspace_path(repo_root, config.workspace_root, path),
                                  old_path=_workspace_path(repo_root, config.workspace_root, old_path) if old_path else None,

@@ -65,10 +65,13 @@ I/O. `network` does not grant access to rules, LLMs, or external-link scans.
 The provider lifecycle is `validate_config` → `open` → `capture` → `close`.
 `capture` receives batched immutable `ProviderQuery` values and returns a
 `ProviderSnapshot` containing normalized `EntityRecord` values, a revision,
-consistency, capture time, and content digest. The core verifies snapshot
-shape and uses handler-declared capabilities before capture. The built-in
+consistency, capture time, and content digest. The engine uses
+handler-declared capabilities before capture. The built-in
 providers are `file-json` and `snapshot`; an embedding application may also
 call `PluginRegistry.register_provider` with an explicit adapter name.
+
+Provider option findings are retained, and invalid configuration or provider
+exceptions prevent a snapshot and produce `PROV-001` with `UNVERIFIED` state.
 
 ## Contract protocol
 
@@ -96,6 +99,11 @@ Only projection and snapshot modes use `render`; authored mode validates the
 body written by a person. Rendering must be deterministic and must not open a
 provider or write a file. A handler's `required_capabilities` is checked
 before the provider session captures its planned queries.
+
+The engine translates a handler `render` exception into a failed
+`CONTRACT-002` finding. Handler `plan` and `validate` exceptions currently
+propagate to the command-level error handler; they are not silently converted
+to a local contract finding.
 
 ## Rule protocol
 

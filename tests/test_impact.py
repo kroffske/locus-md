@@ -145,6 +145,48 @@ def test_impact_nested_workspace_uses_workspace_relative_coordinates(tmp_path: P
     assert all(not change.old_path or "outside.md" not in change.old_path for change in report.changes)
 
 
+def test_impact_cross_boundary_rename_outside_is_projected_as_deletion(tmp_path: Path) -> None:
+    _git(tmp_path, "init", "-q")
+    nested = tmp_path / "packages" / "docs"
+    config_path = _seed_repo(nested, init_git=False)
+    _git(tmp_path, "add", "packages/docs")
+    _git(tmp_path, "-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-qm", "nested-base")
+    _git(tmp_path, "mv", "packages/docs/docs/guide.md", "outside-guide.md")
+
+    config = load_config(explicit=config_path)
+    report = build_impact(config, "HEAD", Engine(config).scan().documents.values())
+
+    row = next(change for change in report.changes if change.path == "docs/guide.md")
+    assert row.status == "deleted"
+    assert row.old_path is None
+    assert row.managed is True
+    assert row.document == "guide"
+    assert row.dependents == ("docs/index.md",)
+    assert all("outside-guide.md" not in change.path for change in report.changes)
+
+
+def test_impact_cross_boundary_rename_inside_is_projected_as_addition(tmp_path: Path) -> None:
+    _git(tmp_path, "init", "-q")
+    nested = tmp_path / "packages" / "docs"
+    config_path = _seed_repo(nested, init_git=False)
+    outside = tmp_path / "outside-guide.md"
+    outside.write_text("# Outside guide\n", encoding="utf-8")
+    _git(tmp_path, "add", "packages/docs", "outside-guide.md")
+    _git(tmp_path, "-c", "user.name=Test", "-c", "user.email=test@example.com", "commit", "-qm", "nested-base")
+    _git(tmp_path, "mv", "outside-guide.md", "packages/docs/docs/from-outside.md")
+
+    config = load_config(explicit=config_path)
+    report = build_impact(config, "HEAD", Engine(config).scan().documents.values())
+
+    row = next(change for change in report.changes if change.path == "docs/from-outside.md")
+    assert row.status == "added"
+    assert row.old_path is None
+    assert row.managed is True
+    assert row.surface == "docs"
+    assert row.document is None
+    assert all("outside-guide.md" not in change.path for change in report.changes)
+
+
 def test_impact_flags_canonical_configuration_change_and_invalid_base_is_typed(tmp_path: Path) -> None:
     config_path = _seed_repo(tmp_path)
     config_path.write_text(config_path.read_text(encoding="utf-8") + "\n# changed\n", encoding="utf-8")

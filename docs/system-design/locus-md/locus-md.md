@@ -52,9 +52,10 @@ patches but does not apply them. `sync --write` can change only a managed block
 body and lock evidence after digest, span, and path checks.
 
 The lock is evidence for managed projections, not a historical document graph.
-Impact therefore reports limits honestly: every Git change row is marked by
-whether the current configuration manages it, and the current graph supplies
-dependents. It does not reconstruct a removed configuration from Git history.
+Impact therefore reports limits honestly: every emitted workspace change row is
+marked by whether the current configuration manages it, and the current graph
+supplies dependents. Changes outside a nested workspace are filtered out. It
+does not reconstruct a removed configuration from Git history.
 
 ## Extension seam
 
