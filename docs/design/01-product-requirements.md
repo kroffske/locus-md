@@ -79,7 +79,7 @@ reproducibility.
 | ID | Requirement |
 |---|---|
 | FR-001 | Discover configuration through an explicit path, environment, or project search |
-| FR-002 | Read only `locus.docs*` sections |
+| FR-002 | Read only `locus.md*` sections |
 | FR-003 | Support multiple independent documentation surfaces |
 | FR-004 | Parse UTF-8 Markdown, YAML frontmatter, links, fenced blocks, and HTML comments |
 | FR-005 | Validate frontmatter with JSON Schema |

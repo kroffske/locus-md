@@ -12,7 +12,7 @@ locus-md sync --check --offline
 
 Tracked:
 
-- `.locus/config.ini`;
+- `.locus/locus.md.toml`;
 - `.locus/docs.lock.json`;
 - optional offline provider snapshot;
 - documents and schemas.

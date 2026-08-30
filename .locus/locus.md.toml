@@ -1,0 +1,39 @@
+[locus.md]
+schema = 1
+surfaces = ["docs"]
+strict = true
+lock_file = ".locus/docs.lock.json"
+cache_dir = ".locus/cache/locus-md"
+network = "deny"
+unverified = "fail"
+
+[locus.md.surface.docs]
+root = "docs"
+include = ["**/*.md"]
+exclude = ["AGENTS.md"]
+index = ["index.md"]
+frontmatter = "required"
+frontmatter_schema = "schemas/document.schema.json"
+require_reachable = true
+follow_symlinks = false
+default_provider = "project-status"
+
+[locus.md.provider.project-status]
+adapter = "file-json"
+path = "data/project-status.json"
+required = true
+network = false
+
+[locus.md.contract.implementation-status]
+surface = "docs"
+path = "implementation-status.md"
+block_kind = "milestone"
+block_id = "dogfood"
+schema = "task-table.v1"
+mode = "projection"
+provider = "project-status"
+selector = { milestone = "dogfood" }
+renderer = "task-table.v1"
+severity = "error"
+required = true
+

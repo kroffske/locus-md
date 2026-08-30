@@ -29,7 +29,7 @@ Create a standalone repository and fix the public boundaries.
 |---|---|---|
 | MD-001 | Repository skeleton, license, and contribution policy | — |
 | MD-002 | Product naming and package mapping | MD-001 |
-| MD-003 | Shared INI namespace decision | MD-002 |
+| MD-003 | Dedicated TOML namespace decision | MD-002 |
 | MD-004 | Public configuration, finding, and snapshot schemas | MD-003 |
 | MD-005 | CI, tests, and package build | MD-001 |
 | MD-006 | Self-contained example workspace | MD-004 |
@@ -66,7 +66,7 @@ Provide useful standalone lint without providers.
 
 ## Acceptance
 
-- A shared INI with unrelated sections does not expose their values.
+- The dedicated TOML file rejects unrelated top-level tables.
 - Different surfaces may use different roots and schemas.
 - Broken links and orphaned documents produce stable findings.
 - Marker-like text inside code fences is ignored.

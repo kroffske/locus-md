@@ -35,32 +35,6 @@ def digest_json(value: Any) -> str:
     return digest_bytes(canonical_json_bytes(value))
 
 
-def split_csv(value: str | None) -> tuple[str, ...]:
-    if value is None:
-        return ()
-    return tuple(part.strip() for part in value.split(",") if part.strip())
-
-
-def parse_bool(value: str | None, *, default: bool = False, key: str = "value") -> bool:
-    if value is None:
-        return default
-    normalized = value.strip().lower()
-    if normalized == "true":
-        return True
-    if normalized == "false":
-        return False
-    raise ConfigError("CFG-004", f"{key} must be true or false, got {value!r}")
-
-
-def parse_int(value: str | None, *, default: int | None = None, key: str = "value") -> int | None:
-    if value is None:
-        return default
-    try:
-        return int(value, 10)
-    except ValueError as exc:
-        raise ConfigError("CFG-005", f"{key} must be a base-10 integer, got {value!r}") from exc
-
-
 def substitute_environment(value: str, env: Mapping[str, str] | None = None) -> str:
     source = os.environ if env is None else env
 

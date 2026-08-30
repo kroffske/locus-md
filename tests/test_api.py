@@ -17,7 +17,7 @@ def test_public_workspace_types_construct_and_lint_without_loading(tmp_path: Pat
     (tmp_path / "docs").mkdir()
     (tmp_path / "docs" / "index.md").write_text("# Index\n", encoding="utf-8")
     workspace = WorkspaceConfig(
-        config_path=tmp_path / ".locus" / "config.ini",
+        config_path=tmp_path / ".locus" / "locus.md.toml",
         workspace_root=tmp_path,
         global_config=GlobalConfig(schema=1, surfaces=("docs",)),
         surfaces={
@@ -48,7 +48,7 @@ def test_public_workspace_types_construct_and_lint_without_loading(tmp_path: Pat
 
 
 def test_lint_workspace_uses_supplied_config_without_loading(monkeypatch: pytest.MonkeyPatch) -> None:
-    config_path = Path(__file__).resolve().parents[1] / "examples" / "basic" / ".locus" / "config.ini"
+    config_path = Path(__file__).resolve().parents[1] / "examples" / "basic" / ".locus" / "locus.md.toml"
     workspace = load_config(explicit=config_path)
     monkeypatch.setattr(api, "load_workspace", lambda **_: pytest.fail("embedded lint must not load config"))
     monkeypatch.setattr(api, "load_config", lambda **_: pytest.fail("embedded lint must not parse config"))
@@ -61,7 +61,7 @@ def test_lint_workspace_uses_supplied_config_without_loading(monkeypatch: pytest
 
 
 def test_lint_workspace_forwards_surface_and_strict_controls(example_workspace: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    workspace = load_config(explicit=example_workspace / ".locus" / "config.ini")
+    workspace = load_config(explicit=example_workspace / ".locus" / "locus.md.toml")
     registry = object()
     captured: dict[str, object] = {}
 
@@ -90,8 +90,8 @@ def test_lint_workspace_forwards_surface_and_strict_controls(example_workspace: 
 
 
 def test_lint_and_lint_workspace_have_matching_reports(example_workspace: Path) -> None:
-    workspace = load_config(explicit=example_workspace / ".locus" / "config.ini")
-    legacy = api.lint(config=example_workspace / ".locus" / "config.ini")
+    workspace = load_config(explicit=example_workspace / ".locus" / "locus.md.toml")
+    legacy = api.lint(config=example_workspace / ".locus" / "locus.md.toml")
     embedded = api.lint_workspace(workspace)
 
     assert legacy.state == embedded.state

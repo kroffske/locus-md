@@ -15,6 +15,7 @@ from .plugins import PluginRegistry
 from .providers.base import ProviderContext
 from .providers.common import load_snapshot_file
 from .rewrite import apply_patches
+from .rules.execution import execute_rules
 from .utils import digest_bytes, digest_text, utc_now
 from .workspace import inventory_workspace
 
@@ -338,14 +339,27 @@ class Engine:
         planned = self._plan(scan, providers=providers, surfaces=surfaces)
         snapshots, provider_findings, required_unverified = self._capture_snapshots(planned, offline=offline, network=network)
         contract_findings, _, _ = self._evaluate(planned, snapshots, mode="verify", emit_outdated=True)
-        findings = self._strict_findings([*scan.findings, *provider_findings, *contract_findings], force_strict)
+        rules = execute_rules(self.config, self.registry, scan.documents, surfaces=surfaces)
+        findings = self._strict_findings([*scan.findings, *provider_findings, *contract_findings, *rules.findings], force_strict)
         if has_failure(findings):
             state = RunState.FAILED
-        elif required_unverified:
+        elif required_unverified or rules.required_unverified:
             state = RunState.UNVERIFIED
         else:
             state = RunState.PASSED
-        return self._report("verify", state, findings, snapshots=snapshots, metadata={"document_count": len(scan.documents), "contract_count": len(planned), "offline": offline})
+        return self._report(
+            "verify",
+            state,
+            findings,
+            snapshots=snapshots,
+            metadata={
+                "document_count": len(scan.documents),
+                "contract_count": len(planned),
+                "rule_invocation_count": rules.invocation_count,
+                "rules": [item.to_dict() for item in rules.provenance],
+                "offline": offline,
+            },
+        )
 
     def sync(
         self, *, write: bool = False, surfaces: set[str] | None = None, providers: set[str] | None = None, offline: bool = False,
@@ -355,14 +369,15 @@ class Engine:
         planned = self._plan(scan, providers=providers, surfaces=surfaces)
         snapshots, provider_findings, required_unverified = self._capture_snapshots(planned, offline=offline, network=network)
         contract_findings, patches, materialized = self._evaluate(planned, snapshots, mode="sync-write" if write else "sync-check", emit_outdated=not write)
+        rules = execute_rules(self.config, self.registry, scan.documents, surfaces=surfaces)
         lock_patch = self._desired_lock_patch(scan, materialized)
         if lock_patch:
             patches.append(lock_patch)
-        findings = [*scan.findings, *provider_findings, *contract_findings]
+        findings = [*scan.findings, *provider_findings, *contract_findings, *rules.findings]
         if write:
             fixable = {"DOC-BLOCK-020", "DOC-BLOCK-021", "DOC-LOCK-003", "DOC-LOCK-004"}
             findings = [finding for finding in findings if finding.code not in fixable]
-            if patches and not required_unverified:
+            if patches and not required_unverified and not rules.required_unverified and not rules.failed:
                 written = apply_patches(patches, workspace_root=self.config.workspace_root, lock_path=lock_path(self.config))
                 files = [str(path.relative_to(self.config.workspace_root)) for path in written]
                 findings.append(Finding(code="SYNC-010", message=f"applied {len(patches)} patch(es) across {len(written)} file(s)",
@@ -370,13 +385,19 @@ class Engine:
         findings = self._strict_findings(findings, force_strict)
         if has_failure(findings):
             state = RunState.FAILED
-        elif required_unverified:
+        elif required_unverified or rules.required_unverified:
             state = RunState.UNVERIFIED
         elif patches and not write:
             state = RunState.FAILED
         else:
             state = RunState.PASSED
-        metadata = {"contract_count": len(planned), "offline": offline, "write": write}
+        metadata = {
+            "contract_count": len(planned),
+            "rule_invocation_count": rules.invocation_count,
+            "rules": [item.to_dict() for item in rules.provenance],
+            "offline": offline,
+            "write": write,
+        }
         return self._report("sync-write" if write else "sync-check", state, findings, snapshots=snapshots, patches=patches, metadata=metadata)
 
     def contracts_list(self, *, surfaces: set[str] | None = None) -> list[dict[str, Any]]:

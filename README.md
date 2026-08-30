@@ -2,9 +2,9 @@
 
 locus-md is a standalone semantic documentation linter for Markdown repositories. It keeps authored prose free-form while validating document envelopes, repository links, managed blocks, and deterministic projections against declared providers.
 
-## Implemented in 0.1.0
+## Implemented through 0.3.0
 
-- isolated `[locus.docs*]` INI configuration;
+- dedicated `.locus/locus.md.toml` TOML configuration;
 - configurable documentation surfaces;
 - YAML frontmatter validated by JSON Schema;
 - local Markdown links and reachability checks;
@@ -16,6 +16,7 @@ locus-md is a standalone semantic documentation linter for Markdown repositories
 - sidecar `.locus/docs.lock.json` drift evidence;
 - byte-preserving span rewrites, atomic replacement, and write-conflict checks;
 - Python entry-point extension boundaries for providers and contract handlers.
+- read-only `verify` rule plugins over immutable whole-document projections.
 
 ## Quick start
 
@@ -28,7 +29,9 @@ locus-md verify --offline
 locus-md sync --check --offline
 ```
 
-The default discovery path is `.locus/config.ini`. A shared INI may contain unrelated Locus sections; locus-md reads only its own namespace.
+The default discovery path is `.locus/locus.md.toml`. The file uses only the
+`[locus.md]` namespace. The separate Locus runtime `.locus/config.toml` is not
+read by locus-md. Set `LOCUS_MD_CONFIG` to override discovery.
 
 `locus-md` is the standalone command. It does not route through the `locus` CLI.
 
@@ -42,12 +45,32 @@ The default discovery path is `.locus/config.ini`. A shared INI may contain unre
 <!-- locus:milestone tasks end -->
 ```
 
-Provider, selector, schema, mode, and renderer remain in the tracked INI contract rather than in the marker.
+Provider, selector, schema, mode, and renderer remain in the tracked TOML
+contract rather than in the marker.
 
 ## Status
 
 This is a runnable alpha/MVP implementation. The repository dogfoods its own
-contract through `.locus/config.ini`; run `locus-md lint`, `locus-md verify
+contract through `.locus/locus.md.toml`; run `locus-md lint`, `locus-md verify
 --offline`, and `locus-md sync --check --offline` from the repository root.
 Remote GitHub and Linear adapters, SARIF, changed-files mode, and bidirectional
 synchronization remain intentionally out of scope.
+
+## Read-only rule plugins
+
+An installed package can expose a rule through the `locus_md.rules` entry-point
+group. A configured rule runs once per selected document during `verify`,
+`sync --check`, and `sync --write`. Static `lint` never runs rules. Rules return
+findings only and cannot contribute patches.
+
+```toml
+[locus.md.rule.policy-coverage]
+adapter = "policy-coverage"
+phase = "verify"
+surface = "docs"
+severity = "error"
+options = { registry = "docs/policies.json" }
+```
+
+See `docs/design/06-provider-plugin-api.md` for the public Python protocol and
+the aggregate failure policy.

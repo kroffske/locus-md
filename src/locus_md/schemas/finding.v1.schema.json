@@ -2,119 +2,62 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.locus-md.dev/finding.v1.schema.json",
   "title": "locus-md Finding v1",
+  "description": "The serialized shape returned by Finding.to_dict().",
   "type": "object",
-  "required": [
-    "schema",
-    "code",
-    "severity",
-    "message",
-    "state"
-  ],
+  "required": ["code", "message", "severity"],
   "properties": {
-    "schema": {
-      "const": "locus-md.finding.v1"
-    },
     "code": {
       "type": "string",
-      "pattern": "^[A-Z][A-Z0-9-]+$"
-    },
-    "severity": {
-      "enum": [
-        "info",
-        "warning",
-        "error",
-        "fatal"
-      ]
+      "pattern": "^(?:[A-Z][A-Z0-9-]*|[a-z][a-z0-9]*(?:\\.[a-z][a-z0-9-]*)+)$"
     },
     "message": {
       "type": "string",
       "minLength": 1
     },
-    "state": {
-      "enum": [
-        "passed",
-        "failed",
-        "unverified",
-        "skipped",
-        "configuration-error",
-        "internal-error"
-      ]
-    },
-    "surface": {
-      "type": "string"
+    "severity": {
+      "enum": ["info", "warning", "error", "fatal"]
     },
     "path": {
       "type": "string"
     },
-    "range": {
-      "type": "object",
-      "properties": {
-        "start": {
-          "$ref": "#/$defs/position"
-        },
-        "end": {
-          "$ref": "#/$defs/position"
-        }
-      },
-      "required": [
-        "start"
-      ],
-      "additionalProperties": false
+    "line": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "column": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "surface": {
+      "type": "string"
     },
     "contract_id": {
       "type": "string"
     },
-    "provider": {
-      "type": "string"
+    "state": {
+      "enum": [
+        "passed",
+        "unverified",
+        "failed",
+        "configuration-error",
+        "internal-error"
+      ]
     },
-    "help": {
-      "type": "string"
-    },
-    "data": {
+    "details": {
       "type": "object"
     },
     "remediation": {
       "type": "object",
+      "required": ["kind", "value"],
       "properties": {
         "kind": {
-          "enum": [
-            "command",
-            "config",
-            "manual"
-          ]
+          "enum": ["command", "config", "manual"]
         },
         "value": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         }
       },
-      "required": [
-        "kind",
-        "value"
-      ],
-      "additionalProperties": false
-    }
-  },
-  "$defs": {
-    "position": {
-      "type": "object",
-      "properties": {
-        "line": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "column": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "offset": {
-          "type": "integer",
-          "minimum": 0
-        }
-      },
-      "required": [
-        "line",
-        "column"
-      ],
       "additionalProperties": false
     }
   },

@@ -1,270 +1,198 @@
 ---
 schema: locus.doc.v1
 id: docs.design.configuration
-title: "locus-md — INI configuration specification"
+title: "locus-md — TOML configuration specification"
 type: guide
 status: active
 owner: team:locus-md
 tags: [configuration, contract]
-updated: "2026-08-28T00:27:14Z"
-source_commit: "6ecd7cfe5fd1"
-update_event: "user_request"
-description: "Validated and connected to locus-md navigation and self-validation contracts."
+updated: "2026-08-30T00:00:00Z"
 ---
 
 # 1. Purpose
 
-locus-md runs as a standalone CLI or an embedded library. A repository may use
-one shared project INI file. The documentation contract never depends on values
-from unrelated sections.
+locus-md owns one dedicated TOML file. The default path is
+`.locus/locus.md.toml`. The file contains only the `locus.md` namespace.
+The separate Locus runtime file `.locus/config.toml` is not read by locus-md.
 
 # 2. Discovery
 
 Precedence:
 
-1. `--config PATH`;
+1. explicit `--config PATH` or API `explicit` path;
 2. `LOCUS_MD_CONFIG`;
-3. `LOCUS_CONFIG`;
-4. upward search for `.locus/config.ini`, `locus.ini`, or `.locus.ini`;
-5. stop at the Git root or filesystem root.
+3. upward search for `.locus/locus.md.toml` until the Git or filesystem root.
 
-More than one candidate at the same level is a configuration error. The
-selected configuration file defines the workspace root. An enclosing Git
-repository does not override it.
+A path with a non-`.toml` suffix returns `CFG-061` migration guidance. Legacy
+names `.locus/config.ini`, `locus.ini`, and `.locus.ini` are never parsed.
+If one is found during discovery, locus-md returns `CFG-061` without writing.
 
-# 3. Namespace isolation
+The selected file defines the workspace root. An enclosing Git repository does
+not override it.
 
-Allowed sections:
+# 3. Namespace
 
-```text
-[locus.docs]
-[locus.docs.surface:<name>]
-[locus.docs.contract:<name>]
-[locus.docs.provider:<name>]
-[locus.docs.rule:<name>]
+The file uses these TOML tables:
+
+```toml
+[locus.md]
+[locus.md.surface.<name>]
+[locus.md.provider.<name>]
+[locus.md.contract.<name>]
+[locus.md.rule.<name>]
 ```
 
-The loader parses the complete INI syntax but copies only allowed sections into
-the normalized model. It does not interpolate unrelated sections, expose their
-values in diagnostics, or rewrite them during initialization.
+Top-level keys other than `locus`, and child tables under `locus` other
+than `md`, are rejected. This keeps locus-md configuration separate from the
+Locus runtime configuration.
 
-```ini
-[application]
-project = example
+# 4. Syntax and types
 
-[tasks]
-provider = remote
+- Encoding is UTF-8.
+- TOML is parsed by the Python standard-library `tomllib`.
+- Booleans use TOML booleans, not quoted strings.
+- Integer fields use TOML integers. Booleans are not integers.
+- List fields are arrays containing only strings.
+- Paths, names, enums, and adapter identifiers are strings.
+- Selectors and rule `options` are TOML tables containing JSON-compatible
+  strings, booleans, integers, finite floats, arrays, and nested tables.
+- Provider adapter options are strings. Reserved provider keys retain their
+  typed fields.
+- TOML dates, times, datetimes, and non-finite floats are rejected with
+  `ConfigError`.
+- Duplicate keys and invalid TOML are rejected.
+- `${ENV:NAME}` substitution is recursive for every string value. The
+  replacement remains a string and is never coerced into another TOML type.
+- Paths are POSIX-style and relative to the workspace root.
 
-[locus.docs]
+# 5. Global table
+
+```toml
+[locus.md]
 schema = 1
-surfaces = docs
-```
-
-Standalone `locus-md` sees only `locus.docs*`.
-
-# 4. Syntax rules
-
-- Encoding: UTF-8.
-- Booleans: `true` and `false`.
-- Integers: base 10.
-- Lists: comma-separated.
-- Objects: strict JSON.
-- Paths: POSIX-style and relative to the workspace root.
-- Duplicate sections or keys: error.
-- Empty values do not replace missing required values.
-- Parser: `ConfigParser(strict=True, interpolation=None)`.
-
-# 5. Environment substitution
-
-Allowed:
-
-```ini
-token = ${ENV:PROVIDER_TOKEN}
-```
-
-Forbidden:
-
-```ini
-value = ${tasks:provider}
-```
-
-The core has no cross-section dependency.
-
-# 6. Global section
-
-```ini
-[locus.docs]
-schema = 1
-surfaces = docs, handbook
+surfaces = ["docs", "handbook"]
 strict = true
-lock_file = .locus/docs.lock.json
-cache_dir = .locus/cache/locus-md
-report_dir = .locus/reports/locus-md
-default_output = human
-network = explicit
-unverified = fail
+lock_file = ".locus/docs.lock.json"
+cache_dir = ".locus/cache/locus-md"
+report_dir = ".locus/reports/locus-md"
+default_output = "human"
+network = "explicit"
+unverified = "fail"
 ```
 
 | Key | Type | Default | Meaning |
-|---|---:|---|---|
-| `schema` | int | required | INI contract version |
-| `surfaces` | list | required | Active surface IDs |
-| `strict` | bool | `false` | Promote configured warnings |
-| `lock_file` | path | `.locus/docs.lock.json` | Tracked projection evidence |
-| `cache_dir` | path | `.locus/cache/locus-md` | Ignored acceleration state |
-| `report_dir` | path | empty | Optional run reports |
+|---|---|---|---|
+| `schema` | integer | required | Configuration schema version; currently `1` |
+| `surfaces` | string array | required | Active surface IDs |
+| `strict` | boolean | `false` | Promote configured warnings |
+| `lock_file` | path string | `.locus/docs.lock.json` | Tracked projection evidence |
+| `cache_dir` | path string | `.locus/cache/locus-md` | Ignored acceleration state |
+| `report_dir` | path string | absent | Optional run reports |
 | `default_output` | enum | `human` | `human` or `json` |
 | `network` | enum | `explicit` | `deny`, `explicit`, or `allow` |
 | `unverified` | enum | `fail` | `fail`, `warn`, or `ignore` |
 
-`cache_dir` and `report_dir` are validated and exposed in the normalized
-configuration. Version `0.1.1` does not yet write cache or report files.
+# 6. Surface table
 
-# 7. Surface section
-
-```ini
-[locus.docs.surface:docs]
-root = docs
-include = **/*.md
-exclude = vendor/**, generated/**
-index = index.md
-frontmatter = required
-frontmatter_schema = schemas/document.schema.json
+```toml
+[locus.md.surface.docs]
+root = "docs"
+include = ["**/*.md"]
+exclude = ["vendor/**", "generated/**"]
+index = ["index.md"]
+frontmatter = "required"
+frontmatter_schema = "schemas/document.schema.json"
 require_reachable = true
 allow_external_links = true
 follow_symlinks = false
-default_provider = tasks
+default_provider = "tasks"
 ```
 
-| Key | Required | Meaning |
-|---|---:|---|
-| `root` | yes | Surface root |
-| `include` | yes | Include globs |
-| `exclude` | no | Exclude globs |
-| `index` | no | One or more graph roots |
-| `frontmatter` | no | `required`, `optional`, or `forbidden` |
-| `frontmatter_schema` | no | JSON Schema path |
-| `require_reachable` | no | Require index reachability |
-| `allow_external_links` | no | Allow remote URLs |
-| `follow_symlinks` | no | Follow symlinked documents; default false |
-| `default_provider` | no | Provider used by inherited bindings |
+`root` and `include` are required. Other keys are optional. Surface names
+match `[a-z][a-z0-9-]{0,31}`.
 
-Surface names match `[a-z][a-z0-9-]{0,31}`.
+# 7. Provider table
 
-# 8. Provider section
-
-```ini
-[locus.docs.provider:tasks]
-adapter = file-json
-path = data/tasks.json
+```toml
+[locus.md.provider.tasks]
+adapter = "file-json"
+path = "data/tasks.json"
 required = true
 network = false
-snapshot_file = .locus/snapshots/tasks.json
+snapshot_file = ".locus/snapshots/tasks.json"
 ```
 
-Reserved keys:
+Reserved keys are `adapter`, `required`, `network`, `snapshot_file`,
+and `cache_ttl`. Any other provider keys are passed to the adapter as string
+options. Provider names are local identities.
 
-| Key | Meaning |
-|---|---|
-| `adapter` | Python entry-point name |
-| `required` | Whether failure affects the aggregate result |
-| `network` | Whether the provider needs network permission |
-| `snapshot_file` | Optional offline snapshot |
-| `cache_ttl` | Reserved cache policy; parsed but not executed in `0.1.1` |
+# 8. Contract table
 
-All other keys are passed to the plugin as string options. Provider names are
-local identities, not service names.
-
-# 9. Contract section
-
-```ini
-[locus.docs.contract:active-milestone]
-surface = docs
-path = milestones.md
-block_kind = milestone
-block_id = tasks
-schema = task-table.v1
-mode = projection
-provider = tasks
-selector = {"milestone":"m01"}
-renderer = task-table.v1
-severity = error
+```toml
+[locus.md.contract.active-milestone]
+surface = "docs"
+path = "milestones.md"
+block_kind = "milestone"
+block_id = "tasks"
+schema = "task-table.v1"
+mode = "projection"
+provider = "tasks"
+selector = { milestone = "m01" }
+renderer = "task-table.v1"
+severity = "error"
 required = true
 ```
 
-Binding identity:
+Binding identity is `surface + normalized path + block_kind + block_id`.
+`provider` may be `inherit` to use the surface default. Projection mode
+requires `renderer`.
 
-```text
-surface + normalized path + block_kind + block_id
+# 9. Rule table
+
+```toml
+[locus.md.rule.policy-coverage]
+adapter = "policy-coverage"
+phase = "verify"
+surface = "docs"
+severity = "error"
+options = { registry = "docs/policies.json" }
 ```
 
-| Key | Required | Meaning |
-|---|---:|---|
-| `surface` | yes | Surface ID |
-| `path` | yes | Path relative to the surface |
-| `block_kind` | yes | Marker kind |
-| `block_id` | yes | Short local identifier |
-| `schema` | yes | Contract schema |
-| `mode` | yes | `authored`, `projection`, or `snapshot` |
-| `provider` | conditional | Provider ID or inherited surface default |
-| `selector` | conditional | Strict JSON object |
-| `renderer` | projection | Renderer ID |
-| `severity` | no | Default finding severity |
-| `required` | no | Treat a missing marker as an error |
+Rules use the `locus_md.rules` entry-point group. A rule runs once per selected
+document during `verify`, `sync --check`, and `sync --write`. Static
+`lint` never runs rules. Rules return findings only and cannot return patches.
 
-# 10. Rule section
+# 10. Initialization
 
-```ini
-[locus.docs.rule:policy-coverage]
-adapter = policy-coverage
-surface = docs
-severity = error
-options = {"registry":"docs/policies.json"}
-```
+`locus-md init` creates the canonical TOML scaffold only when the target is
+missing. Running it again on a valid file succeeds unchanged. It never appends
+to an existing file. `--check` reports whether the file exists and validates
+an existing file without writing. `--print` prints the scaffold without
+writing.
 
-The namespace is reserved, but rule execution is not implemented in API
-`0.1.1`. Declaring a rule currently fails configuration validation with
-`CFG-037`; the tool never silently ignores it.
+An invalid canonical file, a missing `[locus.md]` namespace, an old INI file,
+or an explicit non-TOML path returns migration guidance and leaves all files
+unchanged.
 
-# 11. Precedence
-
-Configuration path:
-
-```text
-CLI > LOCUS_MD_CONFIG > LOCUS_CONFIG > discovery
-```
-
-Contract fields:
-
-```text
-explicit contract > surface default > global default > safe built-in default
-```
-
-Provider and mode are never guessed without an unambiguous default. CLI flags
-may select surfaces or providers, deny network, choose output, and raise
-strictness. They never change provider, mode, selector, or renderer semantics.
-
-# 12. Configuration editing
-
-`locus-md init` creates `.locus/config.ini` when missing or adds only absent
-`locus.docs*` sections. It does not reformat the complete INI. `--check` and
-`--print` provide non-writing modes.
-
-# 13. Validation codes
+# 11. Validation codes
 
 ```text
 CFG-001 config file not found
-CFG-002 duplicate section or key
 CFG-003 unsupported schema
-CFG-010 unknown surface
+CFG-004 invalid boolean, enum, or string type
+CFG-005 invalid integer type
+CFG-007 invalid TOML
+CFG-008 missing [locus.md] namespace
+CFG-009 missing required key
+CFG-010 unknown or inactive surface
 CFG-020 unknown provider
-CFG-030 invalid selector JSON
-CFG-040 cross-section interpolation forbidden
+CFG-025 invalid contract name
+CFG-036 invalid rule/options type or JSON-compatible value
+CFG-040 cross-section or unsupported interpolation
 CFG-050 path escapes workspace
-CFG-060 ambiguous config discovery
+CFG-061 legacy/non-TOML configuration migration required
+CFG-062 unsupported top-level or [locus] child namespace
 ```
 
-# 14. Compatibility
-
-A future TOML frontend may build the same normalized model. It must preserve
-the namespace and isolation rules defined here.
+The normalized output remains `locus-md.config.normalized.v1`; changing the
+source format does not change the embedded runtime model.

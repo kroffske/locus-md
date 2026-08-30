@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any, Literal, Mapping, Sequence
 
 from .utils import digest_json, digest_text
 
@@ -130,6 +130,7 @@ class ContractBinding:
 class RuleConfig:
     name: str
     adapter: str
+    phase: Literal["verify"]
     surface: str | None
     severity: Severity
     options: Mapping[str, Any]
@@ -205,7 +206,14 @@ class WorkspaceConfig:
                 for name, binding in sorted(self.contracts.items())
             },
             "rules": {
-                name: {"adapter": rule.adapter, "surface": rule.surface, "severity": rule.severity.value, "options": dict(rule.options)} for name, rule in sorted(self.rules.items())
+                name: {
+                    "adapter": rule.adapter,
+                    "phase": rule.phase,
+                    "surface": rule.surface,
+                    "severity": rule.severity.value,
+                    "options": dict(rule.options),
+                }
+                for name, rule in sorted(self.rules.items())
             },
             "config_digest": self.config_digest,
         }

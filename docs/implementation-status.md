@@ -17,7 +17,7 @@ description: "Validated and connected to locus-md navigation and self-validation
 ## Implemented self-validation path
 
 This table is materialized from `data/project-status.json`. The
-`.locus/config.ini` manifest binds the source to this block. Synchronization
+`.locus/locus.md.toml` manifest binds the source to this block. Synchronization
 never rewrites the authored text outside the markers.
 
 <!-- locus:milestone dogfood begin -->
@@ -36,7 +36,10 @@ never rewrites the authored text outside the markers.
 - Remote writes and bidirectional authority.
 - SARIF and language-server integration.
 - Changed-files dependency closure.
-- Rule and renderer plugin groups as independently versioned SDKs.
+- Renderer plugins as an independently versioned SDK.
 - Cross-process sandboxing of plugins.
 
-The deferred items are not silently emulated. Unknown adapters and schemas are configuration errors; unavailable required providers produce an explicit `unverified` state.
+Read-only document rules are implemented through the `locus_md.rules` entry
+point group. The deferred items are not silently emulated. Unknown adapters and
+schemas are configuration errors; unavailable required providers or rule
+evidence produce an explicit `unverified` state.

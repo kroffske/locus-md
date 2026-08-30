@@ -59,17 +59,17 @@ surface = root + include/exclude + index + envelope rules + graph rules
 This supports `docs/`, `handbook/`, `adr/`, `runbooks/`, monorepo README sets,
 or individual contract files.
 
-## 3.2. One shared INI file
+## 3.2. One dedicated TOML file
 
-The default path is `.locus/config.ini`; `--config` accepts another path.
-locus-md reads only these namespaces:
+The default path is `.locus/locus.md.toml`; `--config` accepts another path.
+locus-md reads only these tables:
 
 ```text
-[locus.docs]
-[locus.docs.surface:*]
-[locus.docs.contract:*]
-[locus.docs.provider:*]
-[locus.docs.rule:*]
+[locus.md]
+[locus.md.surface.*]
+[locus.md.contract.*]
+[locus.md.provider.*]
+[locus.md.rule.*]
 ```
 
 Unrelated sections are neither interpreted nor interpolated.
@@ -120,7 +120,7 @@ API, register providers, or run `locus-md` as a subprocess.
 
 Included:
 
-- namespaced INI loading;
+- namespaced TOML loading;
 - configurable documentation surfaces;
 - YAML frontmatter with JSON Schema;
 - Markdown scanning and repository graphs;

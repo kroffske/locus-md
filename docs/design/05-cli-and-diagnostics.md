@@ -16,12 +16,12 @@ description: "Validated and connected to locus-md navigation and self-validation
 
 ## `locus-md init`
 
-Creates a new namespaced configuration scaffold or adds missing documentation
-sections.
+Creates the dedicated `.locus/locus.md.toml` configuration scaffold when it is
+missing. It never appends to an existing file.
 
 ```bash
 locus-md init
-locus-md init --config .locus/config.ini --check
+locus-md init --config .locus/locus.md.toml --check
 locus-md init --print
 ```
 
@@ -34,8 +34,7 @@ locus-md config validate
 locus-md config show
 ```
 
-`config show` returns the normalized locus-md model and excludes unrelated INI
-sections.
+`config show` returns the normalized locus-md model from the dedicated TOML file.
 
 ## `locus-md lint`
 
@@ -91,7 +90,7 @@ No sync command writes unless `--write` is present.
 # 1.1 Embedded Python API
 
 Applications that already own workspace configuration can call the typed
-`lint_workspace` entrypoint without repeating INI discovery:
+`lint_workspace` entrypoint without repeating TOML discovery:
 
 ```python
 from pathlib import Path
@@ -99,7 +98,7 @@ from pathlib import Path
 from locus_md import GlobalConfig, SurfaceConfig, WorkspaceConfig, lint_workspace
 
 workspace = WorkspaceConfig(
-    config_path=Path(".locus/config.ini"),
+    config_path=Path(".locus/locus.md.toml"),
     workspace_root=Path("."),
     global_config=GlobalConfig(schema=1, surfaces=("docs",)),
     surfaces={"docs": SurfaceConfig(name="docs", root="docs", include=("**/*.md",))},
@@ -149,11 +148,32 @@ JSON reports follow the packaged `report.v1.schema.json`:
   "mode": "verify",
   "state": "failed",
   "config_digest": "sha256:...",
+  "config_path": "/workspace/.locus/locus.md.toml",
   "snapshots": {},
   "findings": [],
-  "patches": []
+  "patches": [],
+  "metadata": {
+    "document_count": 4,
+    "contract_count": 0,
+    "rule_invocation_count": 4,
+    "rules": [
+      {
+        "rule": "policy-coverage",
+        "adapter": "policy-coverage",
+        "plugin_id": "policy-coverage",
+        "plugin_version": "1.0",
+        "invocation_count": 4
+      }
+    ],
+    "offline": true
+  }
 }
 ```
+
+The packaged report and finding schemas describe the actual `Report.to_dict()`
+shape. Version `0.3.0` corrects both schemas under their existing v1 identifiers
+because earlier files did not validate any report emitted by the CLI. Tests
+validate lint, verify, and both sync modes, including zero and multiple rules.
 
 SARIF may be added after the finding schema stabilizes. Finding-code to rule-ID
 mapping must remain stable.
@@ -174,6 +194,13 @@ may produce `state=unverified` and error severity in CI.
 
 # 4. Finding-code taxonomy
 
+Core findings use `^[A-Z][A-Z0-9-]*$`. External rule packages use a dotted,
+lowercase namespace matching
+`^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9-]*)+$`. Runtime validation and the packaged
+finding schema use this same grammar. For example,
+`vendor.rule.status-invalid` remains an external finding and is not rewritten to
+`RULE-002`.
+
 ```text
 CFG-*       configuration
 DOC-ENV-*   document envelope
@@ -182,6 +209,7 @@ DOC-BLOCK-* managed blocks
 DOC-LOCK-*  lock state
 PROV-*      provider
 CONTRACT-*  contract handler
+RULE-*      read-only document rule
 SYNC-*      patch and write
 PLUGIN-*    plugin loading
 INTERNAL-*  unexpected failure
@@ -203,6 +231,9 @@ CONTRACT-001 missing required entity field
 CONTRACT-002 renderer failure
 PLUGIN-001 unsupported plugin API version
 PLUGIN-002 duplicate plugin registration
+PLUGIN-003 invalid plugin metadata or return contract
+RULE-001 rule execution exception
+RULE-002 invalid rule return value
 SYNC-001 source file changed
 SYNC-010 safe patches applied
 ```

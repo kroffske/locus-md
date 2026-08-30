@@ -26,7 +26,7 @@ boundary, then continue to requirements, architecture, and implementation.
 
 ## Contracts and integration
 
-- [INI configuration](design/03-configuration-spec.md)
+- [TOML configuration](design/03-configuration-spec.md)
 - [Document contract model](design/04-document-contract-model.md)
 - [CLI and diagnostics](design/05-cli-and-diagnostics.md)
 - [Provider and plugin API](design/06-provider-plugin-api.md)

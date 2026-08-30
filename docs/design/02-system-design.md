@@ -48,7 +48,7 @@ Actors:
 Trust boundaries:
 
 - repository content is untrusted input;
-- shared INI files are versioned intent and must be validated;
+- the dedicated TOML file is versioned intent and must be validated;
 - plugins are executable trusted code;
 - remote responses are untrusted data and must be normalized;
 - secrets enter only through environment variables or a host credential layer.
@@ -149,7 +149,7 @@ surface, path, line, column, code, and message.
 
 1. Discover configuration.
 2. Derive the workspace from that configuration.
-3. Load only `locus.docs*` sections.
+3. Load only `locus.md*` sections.
 4. Normalize configuration.
 5. Load the plugin registry.
 6. Record run metadata.
@@ -277,7 +277,7 @@ not a future cache.
 
 | Situation | Result |
 |---|---|
-| Invalid INI or schema | `configuration-error` |
+| Invalid TOML or schema | `configuration-error` |
 | Unknown plugin | `configuration-error` |
 | Marker without a binding | `DOC-BLOCK-010` |
 | Required binding without a marker | `DOC-BLOCK-011` |
@@ -299,7 +299,7 @@ engine must preserve deterministic ordering and keep writes serial.
 ```python
 from locus_md import verify
 
-result = verify(config=".locus/config.ini", offline=True)
+result = verify(config=".locus/locus.md.toml", offline=True)
 ```
 
 The CLI is a thin adapter over the public API.
