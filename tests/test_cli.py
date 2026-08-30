@@ -37,4 +37,4 @@ def test_cli_version_uses_primary_command_name(capsys) -> None:
         main(["--version"])
 
     assert exc.value.code == 0
-    assert capsys.readouterr().out.strip() == "locus-md 0.1.1"
+    assert capsys.readouterr().out.strip() == "locus-md 0.2.0"

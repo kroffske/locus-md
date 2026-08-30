@@ -88,6 +88,25 @@ locus-md sync --write --offline
 
 No sync command writes unless `--write` is present.
 
+# 1.1 Embedded Python API
+
+Applications that already own workspace configuration can call the typed
+`lint_workspace` entrypoint without repeating INI discovery:
+
+```python
+from locus_md import lint_workspace
+from locus_md.config import load_config
+
+workspace = load_config(explicit=".locus/config.ini")
+report = lint_workspace(workspace, surfaces={"docs"}, strict=True)
+```
+
+`lint_workspace` accepts an existing `WorkspaceConfig`, optional surface and
+strict controls, and an optional `PluginRegistry`. It returns the normal
+`Report`. It does not discover or parse configuration. The existing `lint`
+function keeps its config-loading behavior and delegates execution to this
+entrypoint.
+
 ## `locus-md contracts list`
 
 Lists configured bindings, discovered blocks, providers, schema and renderer,
@@ -221,7 +240,7 @@ Network access must be explicitly permitted when `network=explicit`.
 
 ```yaml
 - repo: https://example.invalid/locus-md
-  rev: v0.1.1
+  rev: v0.2.0
   hooks:
     - id: locus-md-lint
 ```

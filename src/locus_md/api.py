@@ -13,12 +13,18 @@ def load_workspace(*, config: str | Path | None = None, start: str | Path | None
     return load_config(explicit=config, start=start, env=env)
 
 
+def lint_workspace(
+    workspace: WorkspaceConfig, *, surfaces: set[str] | None = None, strict: bool = False, registry: PluginRegistry | None = None
+) -> Report:
+    return Engine(workspace, registry=registry).lint(surfaces=surfaces, force_strict=strict)
+
+
 def lint(
     *, config: str | Path | None = None, start: str | Path | None = None, surfaces: set[str] | None = None, strict: bool = False,
     registry: PluginRegistry | None = None
 ) -> Report:
     workspace = load_workspace(config=config, start=start)
-    return Engine(workspace, registry=registry).lint(surfaces=surfaces, force_strict=strict)
+    return lint_workspace(workspace, surfaces=surfaces, strict=strict, registry=registry)
 
 
 def verify(

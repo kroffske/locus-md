@@ -74,4 +74,4 @@ class PluginRegistry:
                 raise ConfigError("CFG-032", f"contract {binding.name!r} uses unsupported renderer {binding.renderer!r} for schema {binding.schema!r}")
         if config.rules:
             names = ", ".join(sorted(config.rules))
-            raise ConfigError("CFG-037", f"rule plugins are declared but rule execution is not implemented in API v0.1: {names}")
+            raise ConfigError("CFG-037", f"rule plugins are declared but rule execution is not implemented: {names}")

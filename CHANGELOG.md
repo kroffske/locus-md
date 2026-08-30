@@ -1,13 +1,17 @@
 # Changelog
 
-## Unreleased
+## 0.2.0
+
+- Expose `lint_workspace` from the package root while preserving the existing
+  config-loading `lint` wrapper.
+- Replace the tracked wheel snapshot with the 0.2.0 package build.
+
+## 0.1.1
 
 - Rename the standalone CLI from the dotted spelling to `locus-md` everywhere.
 - Remove the legacy dotted command alias.
 - Rewrite public documentation and local project guidance in English.
 - Remove machine-specific paths, usernames, and sibling-repository references from documentation.
-
-## 0.1.1
 
 - Bind each workspace to the selected config location instead of an enclosing Git root.
 - Add the repository's own tracked document contract, documentation index, and navigation.
