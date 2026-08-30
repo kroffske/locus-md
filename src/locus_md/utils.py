@@ -70,6 +70,10 @@ def safe_relative_posix(value: str, *, key: str) -> str:
     return PurePosixPath(*parts).as_posix()
 
 
+def display_surface_path(surface_root: str, relative: str) -> str:
+    return relative if surface_root == "." else f"{surface_root}/{relative}"
+
+
 def resolve_inside(root: Path, relative: str, *, key: str) -> Path:
     normalized = safe_relative_posix(relative, key=key)
     candidate = (root / Path(normalized)).resolve(strict=False)

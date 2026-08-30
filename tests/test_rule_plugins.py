@@ -60,7 +60,7 @@ def _append_rule(
     with config_path.open("a", encoding="utf-8") as handle:
         handle.write(
             f"""
-[locus.md.rule.{name}]
+[locus-md.rule.{name}]
 adapter = "{adapter}"
 phase = "{phase}"
 surface = "{surface}"
@@ -187,7 +187,7 @@ def test_rule_surface_and_cli_surface_filter_limit_documents(tmp_path: Path) -> 
         config_path.read_text(encoding="utf-8")
         .replace('surfaces = ["docs"]', 'surfaces = ["docs", "other"]')
         + """
-[locus.md.surface.other]
+[locus-md.surface.other]
 root = "other"
 include = ["**/*.md"]
 """,
@@ -364,7 +364,7 @@ def test_unverified_policy_controls_sync_write(
     expected_severity: Severity,
     write_allowed: bool,
 ) -> None:
-    config_path = example_workspace / ".locus" / "locus.md.toml"
+    config_path = example_workspace / ".locus" / "locus-md.toml"
     config_path.write_text(
         config_path.read_text(encoding="utf-8")
             .replace('unverified = "fail"', f'unverified = "{policy}"')
@@ -393,7 +393,7 @@ def test_unverified_policy_controls_sync_write(
 
 
 def test_strict_promotes_rule_warning_without_changing_unverified_state(example_workspace: Path) -> None:
-    config_path = example_workspace / ".locus" / "locus.md.toml"
+    config_path = example_workspace / ".locus" / "locus-md.toml"
     config_path.write_text(
         config_path.read_text(encoding="utf-8").replace('unverified = "fail"', 'unverified = "warn"'),
         encoding="utf-8",
@@ -412,7 +412,7 @@ def test_strict_promotes_rule_warning_without_changing_unverified_state(example_
 
 @pytest.mark.parametrize("policy", ["fail", "warn", "ignore"])
 def test_failed_rule_always_blocks_sync_write(example_workspace: Path, policy: str) -> None:
-    config_path = example_workspace / ".locus" / "locus.md.toml"
+    config_path = example_workspace / ".locus" / "locus-md.toml"
     config_path.write_text(
         config_path.read_text(encoding="utf-8").replace("unverified = fail", f"unverified = {policy}"),
         encoding="utf-8",

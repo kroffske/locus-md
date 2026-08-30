@@ -81,17 +81,17 @@ def test_host_can_inject_provider_adapter() -> None:
 def test_rule_plugins_fail_closed_when_adapter_is_unknown(tmp_path: Path) -> None:
     (tmp_path / ".locus").mkdir()
     (tmp_path / "docs").mkdir()
-    config_path = tmp_path / ".locus" / "locus.md.toml"
+    config_path = tmp_path / ".locus" / "locus-md.toml"
     config_path.write_text(
-        """[locus.md]
+        """[locus-md]
 schema = 1
 surfaces = ["docs"]
 
-[locus.md.surface.docs]
+[locus-md.surface.docs]
 root = "docs"
 include = ["**/*.md"]
 
-[locus.md.rule.policy-coverage]
+[locus-md.rule.policy-coverage]
 adapter = "policy-coverage"
 phase = "verify"
 surface = "docs"
@@ -162,21 +162,21 @@ def test_rule_metadata_is_one_command_snapshot_for_shared_adapter(tmp_path: Path
     (tmp_path / "docs").mkdir()
     (tmp_path / "docs" / "index.md").write_text("# Index\n", encoding="utf-8")
     (tmp_path / "docs" / "second.md").write_text("# Second\n", encoding="utf-8")
-    config_path = tmp_path / ".locus" / "locus.md.toml"
+    config_path = tmp_path / ".locus" / "locus-md.toml"
     config_path.write_text(
-        """[locus.md]
+        """[locus-md]
 schema = 1
 surfaces = ["docs"]
 
-[locus.md.surface.docs]
+[locus-md.surface.docs]
 root = "docs"
 include = ["**/*.md"]
 
-[locus.md.rule.alpha]
+[locus-md.rule.alpha]
 adapter = "mutating"
 phase = "verify"
 surface = "docs"
-[locus.md.rule.beta]
+[locus-md.rule.beta]
 adapter = "mutating"
 phase = "verify"
 surface = "docs"

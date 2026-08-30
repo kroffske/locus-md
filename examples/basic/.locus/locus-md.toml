@@ -1,4 +1,4 @@
-[locus.md]
+[locus-md]
 schema = 1
 surfaces = ["docs"]
 strict = true
@@ -7,7 +7,7 @@ cache_dir = ".locus/cache/locus-md"
 network = "deny"
 unverified = "fail"
 
-[locus.md.surface.docs]
+[locus-md.surface.docs]
 root = "docs"
 include = ["**/*.md"]
 index = ["index.md"]
@@ -17,14 +17,14 @@ require_reachable = true
 follow_symlinks = false
 default_provider = "tasks"
 
-[locus.md.provider.tasks]
+[locus-md.provider.tasks]
 adapter = "file-json"
 path = "data/tasks.json"
 snapshot_file = ".locus/snapshots/tasks.json"
 required = true
 network = false
 
-[locus.md.contract.active-milestone]
+[locus-md.contract.active-milestone]
 surface = "docs"
 path = "milestones.md"
 block_kind = "milestone"

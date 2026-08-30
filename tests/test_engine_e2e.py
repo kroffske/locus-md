@@ -9,7 +9,7 @@ from locus_md.models import RunState
 
 
 def _engine(workspace: Path) -> Engine:
-    return Engine(load_config(explicit=workspace / ".locus" / "locus.md.toml"))
+    return Engine(load_config(explicit=workspace / ".locus" / "locus-md.toml"))
 
 
 def test_example_lint_verify_and_sync_are_clean(example_workspace: Path) -> None:
@@ -68,7 +68,7 @@ def test_crlf_is_preserved_during_sync(example_workspace: Path) -> None:
 
 
 def test_network_provider_uses_declared_snapshot_offline(example_workspace: Path) -> None:
-    config_path = example_workspace / ".locus" / "locus.md.toml"
+    config_path = example_workspace / ".locus" / "locus-md.toml"
     text = config_path.read_text(encoding="utf-8").replace("network = false", "network = true")
     config_path.write_text(text, encoding="utf-8")
     report = _engine(example_workspace).verify(offline=True)

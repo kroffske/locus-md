@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.locus-md.dev/config-normalized.v1.schema.json",
   "title": "locus-md Normalized Config v1",
-  "description": "The public payload returned by WorkspaceConfig.normalized() and locus-md config show.",
+  "description": "Historical normalized configuration payload retained for v1 consumers. Current WorkspaceConfig.normalized() returns v2.",
   "type": "object",
   "required": [
     "schema",

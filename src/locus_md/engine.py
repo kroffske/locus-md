@@ -16,7 +16,7 @@ from .providers.base import ProviderContext
 from .providers.common import load_snapshot_file
 from .rewrite import apply_patches
 from .rules.execution import execute_rules
-from .utils import digest_bytes, digest_text, utc_now
+from .utils import digest_bytes, digest_text, display_surface_path, utc_now
 from .workspace import inventory_workspace
 
 
@@ -45,7 +45,7 @@ class Engine:
         self.registry.validate_references(config)
 
     def _display_path(self, document: DocumentRecord) -> str:
-        return f"{self.config.surfaces[document.surface].root}/{document.relative_path}"
+        return display_surface_path(self.config.surfaces[document.surface].root, document.relative_path)
 
     def _strict_findings(self, findings: Iterable[Finding], force_strict: bool = False) -> list[Finding]:
         strict = self.config.global_config.strict or force_strict
@@ -86,6 +86,22 @@ class Engine:
                 documents[document.key] = document
         selected_surfaces = surfaces or set(self.config.global_config.surfaces)
         findings.extend(validate_graph(self.config, documents, selected_surfaces=selected_surfaces))
+        for declaration in self.config.documents.values():
+            if declaration.surface not in selected_surfaces:
+                continue
+            key = (declaration.surface, declaration.path)
+            display_path = display_surface_path(self.config.surfaces[declaration.surface].root, declaration.path)
+            document = documents.get(key)
+            if document is None:
+                findings.append(Finding(code="DOC-DECL-001", message=f"declared document {declaration.name!r} does not exist", severity=Severity.ERROR,
+                                        path=display_path, surface=declaration.surface, contract_id=declaration.name,
+                                        details={"document": declaration.name, "surface": declaration.surface, "path": declaration.path}))
+                continue
+            for section in declaration.sections.values():
+                if section.required and section.heading not in document.headings:
+                    findings.append(Finding(code="DOC-SECTION-001", message=f"required section {section.heading!r} is missing",
+                                            severity=Severity.ERROR, path=display_path, surface=declaration.surface, contract_id=declaration.name,
+                                            details={"document": declaration.name, "section": section.name, "heading": section.heading}))
         blocks: dict[tuple[str, str, str, str], tuple[DocumentRecord, ManagedBlock]] = {}
         configured_keys = {binding.key: binding for binding in self.config.contracts.values() if binding.surface in selected_surfaces}
         for document in documents.values():
@@ -104,13 +120,13 @@ class Engine:
             if binding.provider_explicit and surface.default_provider and binding.provider != surface.default_provider:
                 findings.append(
                     Finding(code="DOC-BLOCK-030", message=f"contract explicitly uses provider {binding.provider!r} while surface default is {surface.default_provider!r}",
-                            severity=Severity.WARNING, path=f"{surface.root}/{binding.path}", surface=binding.surface, contract_id=binding.name)
+                            severity=Severity.WARNING, path=display_surface_path(surface.root, binding.path), surface=binding.surface, contract_id=binding.name)
                 )
             if binding.required and binding.key not in blocks:
                 surface = self.config.surfaces[binding.surface]
                 findings.append(
                     Finding(code="DOC-BLOCK-011", message=f"required contract {binding.name!r} has no matching marker {binding.block_kind}/{binding.block_id}",
-                            severity=Severity.ERROR, path=f"{surface.root}/{binding.path}", surface=binding.surface, contract_id=binding.name)
+                            severity=Severity.ERROR, path=display_surface_path(surface.root, binding.path), surface=binding.surface, contract_id=binding.name)
                 )
         lock, lock_findings = load_lock(self.config)
         findings.extend(lock_findings)

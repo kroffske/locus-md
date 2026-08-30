@@ -11,7 +11,8 @@ from typing import Any, Sequence
 from . import __version__
 from .config import initialize_config, load_config
 from .engine import Engine
-from .errors import ConfigError, LocusMdError, WriteConflict
+from .errors import ConfigError, GitError, LocusMdError, WriteConflict
+from .impact import build_impact
 from .models import Report, RunState
 from .plugins import PluginRegistry
 
@@ -52,12 +53,12 @@ def _init_config(args: argparse.Namespace) -> int:
     if result.action == "print":
         print(result.content, end="")
     elif result.action == "missing":
-        print(f"{result.path}: locus.md scaffold is missing")
+        print(f"{result.path}: locus-md scaffold is missing")
         return 1
     elif result.action == "created":
         print(f"created {result.path}")
     else:
-        print(f"{result.path}: locus.md scaffold already present" if args.check else f"unchanged {result.path}")
+        print(f"{result.path}: locus-md scaffold already present" if args.check else f"unchanged {result.path}")
     return 0
 
 
@@ -84,6 +85,59 @@ def _config_show(args: argparse.Namespace, registry: PluginRegistry) -> int:
     config = load_config(explicit=args.config, start=args.start)
     registry.validate_references(config)
     print(json.dumps(config.normalized(redact=True), ensure_ascii=False, indent=2, sort_keys=True))
+    return 0
+
+
+def _guide(args: argparse.Namespace, config: Any) -> int:
+    document = config.documents.get(args.document)
+    if document is None:
+        available = ", ".join(sorted(config.documents)) or "none"
+        raise ConfigError("CFG-070", f"unknown document id {args.document!r}; available ids: {available}")
+    surface = config.surfaces[document.surface]
+    path = document.path if surface.root == "." else f"{surface.root}/{document.path}"
+    payload = {
+        "schema": "locus-md.guide.v1",
+        "document": {
+            "id": document.name,
+            "surface": document.surface,
+            "path": path,
+            "description": document.description,
+            "guidance": document.guidance,
+            "sections": [
+                {"id": section.name, "heading": section.heading, "required": section.required, "guidance": section.guidance}
+                for section in document.sections.values()
+            ],
+        },
+    }
+    if args.format == "json":
+        print(json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True))
+        return 0
+    print(f"Document: {document.name}")
+    print(f"Path: {path}")
+    print(f"Description: {document.description}")
+    if document.guidance:
+        print(f"Guidance: {document.guidance}")
+    for section in document.sections.values():
+        print(f"Section: {section.heading} ({'required' if section.required else 'optional'})")
+        if section.guidance:
+            print(f"  Guidance: {section.guidance}")
+    return 0
+
+
+def _impact(args: argparse.Namespace, engine: Engine) -> int:
+    scan = engine.scan()
+    report = build_impact(engine.config, args.base, scan.documents.values())
+    if args.format == "json":
+        print(json.dumps(report.to_dict(), ensure_ascii=False, indent=2, sort_keys=True))
+    else:
+        print(f"Base: {report.base}")
+        print(f"Configuration changed: {'yes' if report.configuration_changed else 'no'}")
+        for change in report.changes:
+            managed = "managed" if change.managed else "unmanaged"
+            rename = f" from {change.old_path}" if change.old_path else ""
+            print(f"{change.status}: {change.path}{rename} ({managed})")
+            if change.dependents:
+                print(f"  dependents: {', '.join(change.dependents)}")
     return 0
 
 
@@ -139,7 +193,7 @@ def build_parser() -> argparse.ArgumentParser:
     _add_common_options(parser, suppress_defaults=False)
     commands = parser.add_subparsers(dest="command", required=True)
 
-    init = commands.add_parser("init", help="create a locus.md TOML configuration scaffold")
+    init = commands.add_parser("init", help="create a locus-md TOML configuration scaffold")
     _add_common_options(init, suppress_defaults=True)
     init.add_argument("--check", action="store_true", help="check whether the scaffold is present")
     init.add_argument("--print", dest="print_only", action="store_true", help="print scaffold without writing")
@@ -152,6 +206,14 @@ def build_parser() -> argparse.ArgumentParser:
     show = config_commands.add_parser("show", help="show sanitized normalized configuration")
     _add_common_options(show, suppress_defaults=True)
     show.add_argument("--normalized", action="store_true", default=True)
+
+    guide = commands.add_parser("guide", help="show authoring guidance for a declared document")
+    _add_common_options(guide, suppress_defaults=True)
+    guide.add_argument("document", help="declared document id")
+
+    impact = commands.add_parser("impact", help="report documents affected by Git changes")
+    _add_common_options(impact, suppress_defaults=True)
+    impact.add_argument("--base", required=True, help="Git ref to compare with the current worktree")
 
     lint = commands.add_parser("lint", help="run static documentation checks")
     _add_common_options(lint, suppress_defaults=True)
@@ -200,7 +262,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         if args.command == "config" and args.config_command == "show":
             return _config_show(args, registry)
         config = load_config(explicit=args.config, start=args.start)
+        if args.command == "guide":
+            return _guide(args, config)
         engine = Engine(config, registry=registry)
+        if args.command == "impact":
+            return _impact(args, engine)
         if args.command == "lint":
             report = engine.lint(surfaces=_set(args.surface), force_strict=args.strict)
             _print_report(report, args.format)
@@ -234,6 +300,12 @@ def main(argv: Sequence[str] | None = None) -> int:
         else:
             print(f"SYNC-001: {exc}", file=sys.stderr)
         return 4
+    except GitError as exc:
+        if args.format == "json":
+            print(json.dumps({"schema": "locus-md.error.v1", "state": "git-error", "code": exc.code, "message": exc.message}, ensure_ascii=False, indent=2, sort_keys=True))
+        else:
+            print(str(exc), file=sys.stderr)
+        return 2
     except LocusMdError as exc:
         print(str(exc), file=sys.stderr)
         return 1

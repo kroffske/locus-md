@@ -10,15 +10,42 @@ from pathlib import Path
 from typing import Any, Literal, Mapping
 
 from .errors import ConfigError
-from .models import ContractBinding, GlobalConfig, ProviderConfig, RuleConfig, Severity, SurfaceConfig, WorkspaceConfig
+from .models import (
+    ContractBinding,
+    DocumentConfig,
+    DocumentSectionConfig,
+    GlobalConfig,
+    ProviderConfig,
+    RuleConfig,
+    Severity,
+    SurfaceConfig,
+    WorkspaceConfig,
+)
 from .utils import digest_json, safe_relative_posix, substitute_environment, unique_stable
 
 _SURFACE_NAME = re.compile(r"^[a-z][a-z0-9-]{0,31}$")
 _KIND_NAME = re.compile(r"^[a-z][a-z0-9-]{0,31}$")
 _BLOCK_ID = re.compile(r"^[a-z0-9][a-z0-9._-]{0,31}$")
-_DISCOVERY_NAME = ".locus/locus.md.toml"
-_LEGACY_DISCOVERY_NAMES = (".locus/config.ini", "locus.ini", ".locus.ini")
+_DISCOVERY_NAME = ".locus/locus-md.toml"
+_LEGACY_DISCOVERY_NAMES = (".locus/locus.md.toml", ".locus/config.ini", "locus.ini", ".locus.ini")
 _ENV_NAME = "LOCUS_MD_CONFIG"
+
+
+def _normalize_heading(value: str) -> str:
+    return " ".join(value.split())
+
+
+def _surface_path(value: str, *, key: str) -> str:
+    if value.strip().replace("\\", "/") == ".":
+        return "."
+    return safe_relative_posix(value, key=key)
+
+
+def _matches_path(path: str, patterns: tuple[str, ...]) -> bool:
+    from pathlib import PurePosixPath
+
+    candidate = PurePosixPath(path)
+    return any(candidate.match(pattern) or (pattern.startswith("**/") and candidate.match(pattern[3:])) for pattern in patterns)
 
 
 def find_git_root(start: Path) -> Path | None:
@@ -37,11 +64,11 @@ def _absolute_path(value: str | Path) -> Path:
 
 
 def _migration_error(path: Path) -> ConfigError:
-    return ConfigError("CFG-061", f"configuration must be TOML at {_DISCOVERY_NAME}; migrate {path} and use [locus.md] tables", path)
+    return ConfigError("CFG-061", f"configuration must be TOML at {_DISCOVERY_NAME}; migrate {path} and use [locus-md] tables", path)
 
 
 def _validate_toml_path(path: Path) -> None:
-    if path.suffix.lower() != ".toml":
+    if path.name in {"locus.md.toml", "config.ini", "locus.ini", ".locus.ini"} or path.suffix.lower() != ".toml":
         raise _migration_error(path)
 
 
@@ -90,7 +117,7 @@ class InitResult:
 
 
 def _scaffold() -> str:
-    return """[locus.md]
+    return """[locus-md]
 schema = 1
 surfaces = ["docs"]
 strict = false
@@ -99,7 +126,7 @@ cache_dir = ".locus/cache/locus-md"
 network = "explicit"
 unverified = "fail"
 
-[locus.md.surface.docs]
+[locus-md.surface.docs]
 root = "docs"
 include = ["**/*.md"]
 index = ["index.md"]
@@ -154,18 +181,18 @@ def _read_toml(config_path: Path, env: Mapping[str, str] | None) -> dict[str, An
         code = "CFG-002" if "Cannot overwrite" in message or "Cannot declare" in message else "CFG-007"
         raise ConfigError(code, message, config_path) from exc
     parsed = _substitute_tree(parsed, env)
-    if set(parsed) - {"locus"}:
-        keys = ", ".join(sorted(set(parsed) - {"locus"}))
-        raise ConfigError("CFG-062", f"unsupported top-level key(s): {keys}; use only [locus.md] tables", config_path)
-    locus = parsed.get("locus")
-    if not isinstance(locus, dict):
-        raise ConfigError("CFG-008", "missing [locus.md] section", config_path)
-    if set(locus) - {"md"}:
-        keys = ", ".join(sorted(set(locus) - {"md"}))
-        raise ConfigError("CFG-062", f"unsupported [locus] child table(s): {keys}; use only [locus.md] tables", config_path)
-    md = locus.get("md")
+    if "locus" in parsed:
+        raise _migration_error(config_path)
+    if set(parsed) - {"locus-md"}:
+        keys = ", ".join(sorted(set(parsed) - {"locus-md"}))
+        raise ConfigError("CFG-062", f"unsupported top-level key(s): {keys}; use only [locus-md] tables", config_path)
+    md = parsed.get("locus-md")
     if not isinstance(md, dict):
-        raise ConfigError("CFG-008", "missing [locus.md] section", config_path)
+        raise ConfigError("CFG-008", "missing [locus-md] section", config_path)
+    allowed = {"schema", "surfaces", "strict", "lock_file", "cache_dir", "report_dir", "default_output", "network", "unverified", "surface", "provider", "contract", "rule", "document"}
+    unknown = set(md) - allowed
+    if unknown:
+        raise ConfigError("CFG-062", f"unsupported [locus-md] child table/key(s): {', '.join(sorted(unknown))}", config_path)
     return md
 
 
@@ -291,30 +318,33 @@ def load_config(*, explicit: str | Path | None = None, start: str | Path | None 
     workspace_root = workspace_root_for_config(config_path)
     sections = _read_toml(config_path, env)
     raw_global = sections
-    schema = _integer(_required(raw_global, "schema", "locus.md"), key="locus.md.schema")
+    schema = _integer(_required(raw_global, "schema", "locus-md"), key="locus-md.schema")
     if schema != 1:
         raise ConfigError("CFG-003", f"unsupported config schema {schema!r}; expected 1", config_path)
-    active_surfaces = _string_list(_required(raw_global, "surfaces", "locus.md"), key="locus.md.surfaces", required=True)
-    lock_file = safe_relative_posix(_string(raw_global.get("lock_file"), key="locus.md.lock_file", default=".locus/docs.lock.json"), key="locus.md.lock_file")
-    cache_dir = safe_relative_posix(_string(raw_global.get("cache_dir"), key="locus.md.cache_dir", default=".locus/cache/locus-md"), key="locus.md.cache_dir")
-    report_dir = _string(raw_global.get("report_dir"), key="locus.md.report_dir")
+    raw_active_surfaces = _required(raw_global, "surfaces", "locus-md")
+    if isinstance(raw_active_surfaces, list) and all(isinstance(item, str) for item in raw_active_surfaces) and len(raw_active_surfaces) != len(set(raw_active_surfaces)):
+        raise ConfigError("CFG-010", "locus-md.surfaces must not contain duplicate names")
+    active_surfaces = _string_list(raw_active_surfaces, key="locus-md.surfaces", required=True)
+    lock_file = safe_relative_posix(_string(raw_global.get("lock_file"), key="locus-md.lock_file", default=".locus/docs.lock.json"), key="locus-md.lock_file")
+    cache_dir = safe_relative_posix(_string(raw_global.get("cache_dir"), key="locus-md.cache_dir", default=".locus/cache/locus-md"), key="locus-md.cache_dir")
+    report_dir = _string(raw_global.get("report_dir"), key="locus-md.report_dir")
     if report_dir:
-        report_dir = safe_relative_posix(report_dir, key="locus.md.report_dir")
-    global_config = GlobalConfig(schema=1, surfaces=active_surfaces, strict=_boolean(raw_global.get("strict"), key="locus.md.strict"),
+        report_dir = safe_relative_posix(report_dir, key="locus-md.report_dir")
+    global_config = GlobalConfig(schema=1, surfaces=active_surfaces, strict=_boolean(raw_global.get("strict"), key="locus-md.strict"),
                                  lock_file=lock_file, cache_dir=cache_dir, report_dir=report_dir,
-                                 default_output=_choice(raw_global.get("default_output"), {"human", "json"}, key="locus.md.default_output", default="human"),
-                                 network=_choice(raw_global.get("network"), {"deny", "explicit", "allow"}, key="locus.md.network", default="explicit"),
-                                 unverified=_choice(raw_global.get("unverified"), {"fail", "warn", "ignore"}, key="locus.md.unverified", default="fail"))
+                                 default_output=_choice(raw_global.get("default_output"), {"human", "json"}, key="locus-md.default_output", default="human"),
+                                 network=_choice(raw_global.get("network"), {"deny", "explicit", "allow"}, key="locus-md.network", default="explicit"),
+                                 unverified=_choice(raw_global.get("unverified"), {"fail", "warn", "ignore"}, key="locus-md.unverified", default="fail"))
     surfaces: dict[str, SurfaceConfig] = {}
-    raw_surfaces = _section(sections.get("surface"), "locus.md.surface")
+    raw_surfaces = _section(sections.get("surface"), "locus-md.surface")
     for name in active_surfaces:
         if not _SURFACE_NAME.fullmatch(name):
             raise ConfigError("CFG-010", f"invalid surface name {name!r}")
-        section_name = f"locus.md.surface.{name}"
+        section_name = f"locus-md.surface.{name}"
         raw = _section(raw_surfaces.get(name), section_name)
         if not raw:
             raise ConfigError("CFG-010", f"missing [{section_name}] section")
-        root = safe_relative_posix(_string(_required(raw, "root", section_name), key=f"{section_name}.root", required=True), key=f"{section_name}.root")
+        root = _surface_path(_string(_required(raw, "root", section_name), key=f"{section_name}.root", required=True), key=f"{section_name}.root")
         includes = _string_list(_required(raw, "include", section_name), key=f"{section_name}.include", required=True)
         excludes = _string_list(raw.get("exclude"), key=f"{section_name}.exclude")
         indexes = tuple(safe_relative_posix(value, key=f"{section_name}.index") for value in _string_list(raw.get("index"), key=f"{section_name}.index"))
@@ -328,13 +358,62 @@ def load_config(*, explicit: str | Path | None = None, start: str | Path | None 
                                        allow_external_links=_boolean(raw.get("allow_external_links"), key=f"{section_name}.allow_external_links", default=True),
                                        follow_symlinks=_boolean(raw.get("follow_symlinks"), key=f"{section_name}.follow_symlinks"),
                                        default_provider=_string(raw.get("default_provider"), key=f"{section_name}.default_provider"))
+    documents: dict[str, DocumentConfig] = {}
+    document_paths: dict[tuple[str, str], str] = {}
+    raw_documents = _section(sections.get("document"), "locus-md.document")
+    document_keys = {"surface", "path", "description", "guidance", "sections"}
+    section_keys = {"heading", "required", "guidance"}
+    for name, value in raw_documents.items():
+        if not isinstance(name, str) or not _SURFACE_NAME.fullmatch(name):
+            raise ConfigError("CFG-055", f"invalid document name {name!r}")
+        section_name = f"locus-md.document.{name}"
+        raw = _section(value, section_name)
+        unknown = set(raw) - document_keys
+        if unknown:
+            raise ConfigError("CFG-056", f"unknown key(s) in [{section_name}]: {', '.join(sorted(unknown))}")
+        surface_name = _string(_required(raw, "surface", section_name), key=f"{section_name}.surface", required=True)
+        if surface_name not in surfaces:
+            raise ConfigError("CFG-010", f"document {name!r} references unknown or inactive surface {surface_name!r}")
+        path = safe_relative_posix(_string(_required(raw, "path", section_name), key=f"{section_name}.path", required=True), key=f"{section_name}.path")
+        document_key = (surface_name, path)
+        if document_key in document_paths:
+            raise ConfigError("CFG-053", f"documents {document_paths[document_key]!r} and {name!r} have the same path {surface_name}:{path}")
+        document_paths[document_key] = name
+        description = _string(_required(raw, "description", section_name), key=f"{section_name}.description", required=True)
+        guidance = _string(raw.get("guidance"), key=f"{section_name}.guidance")
+        surface = surfaces[surface_name]
+        if not _matches_path(path, surface.include) or _matches_path(path, surface.exclude):
+            raise ConfigError("CFG-054", f"document {name!r} path {path!r} is not selected by surface {surface_name!r}")
+        sections_config: dict[str, DocumentSectionConfig] = {}
+        headings: set[str] = set()
+        raw_sections = _section(raw.get("sections"), f"{section_name}.sections")
+        for section_id, section_value in raw_sections.items():
+            if not isinstance(section_id, str) or not _SURFACE_NAME.fullmatch(section_id):
+                raise ConfigError("CFG-057", f"invalid section name {section_id!r} in [{section_name}.sections]")
+            section_table_name = f"{section_name}.sections.{section_id}"
+            section_raw = _section(section_value, section_table_name)
+            unknown_section = set(section_raw) - section_keys
+            if unknown_section:
+                raise ConfigError("CFG-058", f"unknown key(s) in [{section_table_name}]: {', '.join(sorted(unknown_section))}")
+            heading_value = _string(_required(section_raw, "heading", section_table_name), key=f"{section_table_name}.heading", required=True)
+            heading = _normalize_heading(heading_value or "")
+            if not heading:
+                raise ConfigError("CFG-059", f"{section_table_name}.heading must not be empty")
+            if heading in headings:
+                raise ConfigError("CFG-059", f"duplicate normalized heading {heading!r} in document {name!r}")
+            headings.add(heading)
+            sections_config[section_id] = DocumentSectionConfig(
+                name=section_id, heading=heading, required=_boolean(section_raw.get("required"), key=f"{section_table_name}.required", default=True),
+                guidance=_string(section_raw.get("guidance"), key=f"{section_table_name}.guidance"),
+            )
+        documents[name] = DocumentConfig(name=name, surface=surface_name, path=path, description=description, guidance=guidance, sections=sections_config)
     providers: dict[str, ProviderConfig] = {}
-    raw_providers = _section(sections.get("provider"), "locus.md.provider")
+    raw_providers = _section(sections.get("provider"), "locus-md.provider")
     provider_reserved = {"adapter", "required", "network", "snapshot_file", "cache_ttl"}
     for name, value in raw_providers.items():
         if not isinstance(name, str) or not _SURFACE_NAME.fullmatch(name):
             raise ConfigError("CFG-020", f"invalid provider name {name!r}")
-        section_name = f"locus.md.provider.{name}"
+        section_name = f"locus-md.provider.{name}"
         raw = _section(value, section_name)
         options = {key: item for key, item in raw.items() if key not in provider_reserved}
         if any(not isinstance(key, str) or not isinstance(item, str) for key, item in options.items()):
@@ -348,11 +427,11 @@ def load_config(*, explicit: str | Path | None = None, start: str | Path | None 
                                          cache_ttl=_integer(raw.get("cache_ttl"), key=f"{section_name}.cache_ttl"), options=options)
     contracts: dict[str, ContractBinding] = {}
     binding_keys: dict[tuple[str, str, str, str], str] = {}
-    raw_contracts = _section(sections.get("contract"), "locus.md.contract")
+    raw_contracts = _section(sections.get("contract"), "locus-md.contract")
     for name, value in raw_contracts.items():
         if not isinstance(name, str) or not _SURFACE_NAME.fullmatch(name):
             raise ConfigError("CFG-025", f"invalid contract name {name!r}")
-        section_name = f"locus.md.contract.{name}"
+        section_name = f"locus-md.contract.{name}"
         raw = _section(value, section_name)
         surface_name = _string(_required(raw, "surface", section_name), key=f"{section_name}.surface", required=True)
         if surface_name not in surfaces:
@@ -386,11 +465,11 @@ def load_config(*, explicit: str | Path | None = None, start: str | Path | None 
         contracts[name] = binding
     rules: dict[str, RuleConfig] = {}
     rule_keys = {"adapter", "phase", "surface", "severity", "options"}
-    raw_rules = _section(sections.get("rule"), "locus.md.rule")
+    raw_rules = _section(sections.get("rule"), "locus-md.rule")
     for name, value in raw_rules.items():
         if not isinstance(name, str) or not _SURFACE_NAME.fullmatch(name):
             raise ConfigError("CFG-035", f"invalid rule name {name!r}")
-        section_name = f"locus.md.rule.{name}"
+        section_name = f"locus-md.rule.{name}"
         raw = _section(value, section_name)
         unknown_keys = set(raw) - rule_keys
         if unknown_keys:
@@ -406,5 +485,12 @@ def load_config(*, explicit: str | Path | None = None, start: str | Path | None 
         if surface.default_provider and surface.default_provider not in providers:
             raise ConfigError("CFG-020", f"surface {surface.name!r} references unknown default_provider {surface.default_provider!r}")
     digest_payload = _config_digest_payload(global_config, surfaces, providers, contracts, rules)
+    digest_payload["documents"] = {
+        name: {
+            "surface": item.surface, "path": item.path, "description": item.description, "guidance": item.guidance,
+            "sections": {key: {"heading": section.heading, "required": section.required, "guidance": section.guidance} for key, section in item.sections.items()},
+        }
+        for name, item in sorted(documents.items())
+    }
     return WorkspaceConfig(config_path=config_path, workspace_root=workspace_root, global_config=global_config, surfaces=surfaces,
-                           providers=providers, contracts=contracts, rules=rules, config_digest=digest_json(digest_payload))
+                           providers=providers, contracts=contracts, rules=rules, config_digest=digest_json(digest_payload), documents=documents)

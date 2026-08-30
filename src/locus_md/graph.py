@@ -5,9 +5,32 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 from .models import DocumentRecord, Finding, Severity, WorkspaceConfig
-from .utils import is_inside
+from .utils import display_surface_path, is_inside
 
 _EXTERNAL_SCHEMES = {"http", "https", "mailto", "ftp", "ftps", "ssh", "tel", "data"}
+
+
+def current_reverse_links(config: WorkspaceConfig, documents: dict[tuple[str, str], DocumentRecord]) -> dict[Path, tuple[str, ...]]:
+    """Return current inbound links without persisting graph state."""
+    reverse: dict[Path, set[str]] = defaultdict(set)
+    for document in documents.values():
+        display_path = display_surface_path(config.surfaces[document.surface].root, document.relative_path)
+        for link in document.links:
+            parsed = urlsplit(link.target)
+            if parsed.scheme.lower() in _EXTERNAL_SCHEMES or link.target.startswith("//"):
+                continue
+            path_part = unquote(parsed.path)
+            if not path_part:
+                continue
+            target = (config.workspace_root / path_part.lstrip("/")) if path_part.startswith("/") else (document.absolute_path.parent / path_part)
+            if target.is_dir():
+                for index_name in ("index.md", "README.md"):
+                    candidate = target / index_name
+                    if candidate.exists():
+                        target = candidate
+                        break
+            reverse[target.resolve(strict=False)].add(display_path)
+    return {path: tuple(sorted(sources)) for path, sources in reverse.items()}
 
 
 def validate_graph(config: WorkspaceConfig, documents: dict[tuple[str, str], DocumentRecord], *, selected_surfaces: set[str] | None = None) -> list[Finding]:
@@ -16,7 +39,7 @@ def validate_graph(config: WorkspaceConfig, documents: dict[tuple[str, str], Doc
     adjacency: dict[tuple[str, str], set[tuple[str, str]]] = defaultdict(set)
     canonical_ids: dict[str, tuple[str, str]] = {}
     for key, document in documents.items():
-        display_path = f"{config.surfaces[document.surface].root}/{document.relative_path}"
+        display_path = display_surface_path(config.surfaces[document.surface].root, document.relative_path)
         data = document.frontmatter.data or {}
         doc_id = data.get("id") if isinstance(data, dict) else None
         if isinstance(doc_id, str) and doc_id:
@@ -84,7 +107,7 @@ def validate_graph(config: WorkspaceConfig, documents: dict[tuple[str, str], Doc
             key = (surface_name, index_path)
             if key not in documents:
                 findings.append(Finding(code="DOC-LINK-022", message=f"configured index does not exist in the surface inventory: {index_path}",
-                                        severity=Severity.ERROR, path=f"{surface.root}/{index_path}", surface=surface_name))
+                                        severity=Severity.ERROR, path=display_surface_path(surface.root, index_path), surface=surface_name))
             else:
                 roots.append(key)
     reachable: set[tuple[str, str]] = set()
@@ -99,5 +122,5 @@ def validate_graph(config: WorkspaceConfig, documents: dict[tuple[str, str], Doc
         surface = config.surfaces[document.surface]
         if document.surface in active_surfaces and surface.require_reachable and key not in reachable:
             findings.append(Finding(code="DOC-LINK-020", message="document is not reachable from a configured index", severity=Severity.WARNING,
-                                    path=f"{surface.root}/{document.relative_path}", surface=document.surface))
+                                    path=display_surface_path(surface.root, document.relative_path), surface=document.surface))
     return findings

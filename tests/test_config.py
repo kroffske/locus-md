@@ -14,7 +14,7 @@ from conftest import write_minimal_workspace
 
 
 def _normalized_schema() -> dict:
-    schema = files("locus_md").joinpath("schemas/config-normalized.v1.schema.json")
+    schema = files("locus_md").joinpath("schemas/config-normalized.v2.schema.json")
     return json.loads(schema.read_text(encoding="utf-8"))
 
 
@@ -27,11 +27,11 @@ def test_dedicated_namespace_rejects_unrelated_values(tmp_path: Path) -> None:
 
 def test_environment_substitution_is_recursive_and_preserves_strings(tmp_path: Path) -> None:
     path = write_minimal_workspace(tmp_path)
-    path.write_text("""[locus.md]
+    path.write_text("""[locus-md]
 schema = 1
 surfaces = ["docs"]
 
-[locus.md.surface.docs]
+[locus-md.surface.docs]
 root = "${ENV:DOCS_ROOT}"
 include = ["**/*.md", "${ENV:EXTRA_GLOB}"]
 """, encoding="utf-8")
@@ -42,11 +42,11 @@ include = ["**/*.md", "${ENV:EXTRA_GLOB}"]
 
 def test_cross_section_interpolation_is_rejected(tmp_path: Path) -> None:
     path = write_minimal_workspace(tmp_path)
-    path.write_text("""[locus.md]
+    path.write_text("""[locus-md]
 schema = 1
 surfaces = ["docs"]
 
-[locus.md.surface.docs]
+[locus-md.surface.docs]
 root = "${locus.tasks.root}"
 include = ["**/*.md"]
 """, encoding="utf-8")
@@ -56,7 +56,7 @@ include = ["**/*.md"]
 
 def test_duplicate_toml_keys_have_stable_config_error(tmp_path: Path) -> None:
     path = write_minimal_workspace(tmp_path)
-    path.write_text("[locus.md]\nschema = 1\nschema = 1\nsurfaces = [\"docs\"]\n", encoding="utf-8")
+    path.write_text("[locus-md]\nschema = 1\nschema = 1\nsurfaces = [\"docs\"]\n", encoding="utf-8")
     with pytest.raises(ConfigError, match="CFG-002"):
         load_config(explicit=path)
 
@@ -81,7 +81,7 @@ def test_discovery_precedence_is_explicit_then_environment_then_upward(tmp_path:
 
 def test_generic_environment_alias_is_not_read(tmp_path: Path) -> None:
     path = tmp_path / "config.toml"
-    path.write_text("[locus.md]\nschema = 1\nsurfaces = [\"docs\"]\n", encoding="utf-8")
+    path.write_text("[locus-md]\nschema = 1\nsurfaces = [\"docs\"]\n", encoding="utf-8")
     with pytest.raises(ConfigError, match="CFG-001"):
         discover_config(start=tmp_path / "nested", env={"LOCUS_CONFIG": str(path)})
 
@@ -104,19 +104,19 @@ def test_explicit_ini_path_gets_migration_guidance_without_reading(tmp_path: Pat
 
 def test_contract_path_escape_is_rejected(tmp_path: Path) -> None:
     path = write_minimal_workspace(tmp_path)
-    path.write_text("""[locus.md]
+    path.write_text("""[locus-md]
 schema = 1
 surfaces = ["docs"]
 
-[locus.md.surface.docs]
+[locus-md.surface.docs]
 root = "docs"
 include = ["**/*.md"]
 
-[locus.md.provider.tasks]
+[locus-md.provider.tasks]
 adapter = "file-json"
 path = "data/tasks.json"
 
-[locus.md.contract.x]
+[locus-md.contract.x]
 surface = "docs"
 path = "../outside.md"
 block_kind = "milestone"
@@ -131,14 +131,14 @@ renderer = "task-table.v1"
 
 
 def test_packaged_schema_validates_real_normalized_config_without_rules(example_workspace: Path) -> None:
-    config = load_config(explicit=example_workspace / ".locus" / "locus.md.toml")
+    config = load_config(explicit=example_workspace / ".locus" / "locus-md.toml")
     validate(instance=config.normalized(), schema=_normalized_schema())
 
 
 def test_packaged_schema_validates_real_normalized_config_with_rule(tmp_path: Path) -> None:
     config_path = write_minimal_workspace(tmp_path)
     config_path.write_text(config_path.read_text(encoding="utf-8") + """
-[locus.md.rule.policy]
+[locus-md.rule.policy]
 adapter = "policy"
 phase = "verify"
 surface = "docs"
@@ -153,7 +153,7 @@ options = { registry = "docs/policies.json" }
 def test_rule_options_reject_non_finite_toml_values_before_plugin_validation(tmp_path: Path, value: str) -> None:
     config_path = write_minimal_workspace(tmp_path)
     config_path.write_text(config_path.read_text(encoding="utf-8") + f"""
-[locus.md.rule.policy]
+[locus-md.rule.policy]
 adapter = "policy"
 phase = "verify"
 surface = "docs"
@@ -175,7 +175,7 @@ def test_native_toml_types_are_strict(tmp_path: Path, key: str, value: str) -> N
 def test_provider_options_must_be_strings(tmp_path: Path) -> None:
     config_path = write_minimal_workspace(tmp_path)
     config_path.write_text(config_path.read_text(encoding="utf-8") + """
-[locus.md.provider.tasks]
+[locus-md.provider.tasks]
 adapter = "file-json"
 custom = true
 """, encoding="utf-8")
@@ -186,7 +186,7 @@ custom = true
 def test_init_is_create_only_and_idempotent(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
     assert main(["init"]) == 0
-    path = tmp_path / ".locus" / "locus.md.toml"
+    path = tmp_path / ".locus" / "locus-md.toml"
     first = path.read_text(encoding="utf-8")
     assert main(["init"]) == 0
     assert path.read_text(encoding="utf-8") == first
@@ -194,7 +194,7 @@ def test_init_is_create_only_and_idempotent(tmp_path: Path, monkeypatch: pytest.
 
 def test_init_rejects_invalid_existing_and_legacy_without_writes(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.chdir(tmp_path)
-    target = tmp_path / ".locus" / "locus.md.toml"
+    target = tmp_path / ".locus" / "locus-md.toml"
     target.parent.mkdir()
     target.write_text("[wrong]\nvalue = 1\n", encoding="utf-8")
     before = target.read_bytes()

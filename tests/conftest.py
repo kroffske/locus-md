@@ -19,18 +19,18 @@ def write_minimal_workspace(root: Path, *, extra_ini: str = "") -> Path:
     (root / ".locus").mkdir(parents=True, exist_ok=True)
     (root / "docs").mkdir(parents=True, exist_ok=True)
     (root / "docs" / "index.md").write_text("# Index\n", encoding="utf-8")
-    config = """[locus.md]
+    config = """[locus-md]
 schema = 1
 surfaces = ["docs"]
 
-[locus.md.surface.docs]
+[locus-md.surface.docs]
 root = "docs"
 include = ["**/*.md"]
 index = ["index.md"]
 frontmatter = "optional"
 require_reachable = true
 """
-    path = root / ".locus" / "locus.md.toml"
+    path = root / ".locus" / "locus-md.toml"
     path.write_text(config, encoding="utf-8")
     return path
 

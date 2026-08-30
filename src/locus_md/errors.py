@@ -35,3 +35,12 @@ class WriteConflict(LocusMdError):
 
     def __str__(self) -> str:
         return f"Write conflict for {self.path}: {self.message}"
+
+
+@dataclass(slots=True)
+class GitError(LocusMdError):
+    code: str
+    message: str
+
+    def __str__(self) -> str:
+        return f"{self.code}: {self.message}"

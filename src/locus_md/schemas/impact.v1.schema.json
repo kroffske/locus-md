@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.locus-md.dev/impact.v1.schema.json",
+  "title": "locus-md Git Impact v1",
+  "type": "object",
+  "required": ["schema", "base", "configuration_changed", "changes"],
+  "properties": {
+    "schema": {"const": "locus-md.impact.v1"}, "base": {"type": "string"}, "configuration_changed": {"type": "boolean"},
+    "changes": {"type": "array", "items": {"$ref": "#/$defs/change"}}
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "change": {
+      "type": "object",
+      "required": ["status", "path", "managed", "dependents"],
+      "properties": {
+        "status": {"enum": ["added", "changed", "deleted", "renamed", "copied"]}, "path": {"type": "string"},
+        "old_path": {"type": "string"}, "managed": {"type": "boolean"}, "surface": {"type": "string"}, "document": {"type": "string"},
+        "dependents": {"type": "array", "items": {"type": "string"}}
+      },
+      "additionalProperties": false
+    }
+  }
+}

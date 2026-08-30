@@ -4,7 +4,7 @@ from pathlib import Path, PurePosixPath
 from typing import Iterable
 
 from .models import Finding, Severity, SurfaceConfig, WorkspaceConfig
-from .utils import is_inside
+from .utils import display_surface_path, is_inside
 
 
 def _matches_any(path: str, patterns: Iterable[str]) -> bool:
@@ -37,12 +37,12 @@ def inventory_surface(config: WorkspaceConfig, surface: SurfaceConfig) -> tuple[
                 continue
             if candidate.is_symlink() and not surface.follow_symlinks:
                 findings.append(Finding(code="DOC-ENV-102", message="symlinked document skipped because follow_symlinks=false",
-                                        severity=Severity.WARNING, path=f"{surface.root}/{relative}", surface=surface.name))
+                                        severity=Severity.WARNING, path=display_surface_path(surface.root, relative), surface=surface.name))
                 continue
             resolved = candidate.resolve(strict=False)
             if not is_inside(resolved, config.workspace_root):
                 findings.append(Finding(code="DOC-ENV-103", message="document resolves outside the workspace", severity=Severity.ERROR,
-                                        path=f"{surface.root}/{relative}", surface=surface.name))
+                                        path=display_surface_path(surface.root, relative), surface=surface.name))
                 continue
             candidates[relative] = candidate
     return sorted(candidates.items()), findings

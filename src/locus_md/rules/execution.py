@@ -7,6 +7,7 @@ from typing import Mapping
 
 from ..models import DocumentRecord, Finding, Remediation, RuleConfig, RunState, Severity, WorkspaceConfig
 from ..plugins import PluginRegistry
+from ..utils import display_surface_path
 from .api import RuleContext, RuleDocument, RuleLink, RulePlugin, readonly_mapping
 
 _SEVERITY_RANK = {Severity.INFO: 0, Severity.WARNING: 1, Severity.ERROR: 2, Severity.FATAL: 3}
@@ -55,11 +56,10 @@ class RuleExecution:
 
 def _project_document(config: WorkspaceConfig, document: DocumentRecord) -> RuleDocument:
     frontmatter = document.frontmatter.data
-    root = config.surfaces[document.surface].root
     return RuleDocument(
         surface=document.surface,
         relative_path=document.relative_path,
-        display_path=f"{root}/{document.relative_path}",
+        display_path=display_surface_path(config.surfaces[document.surface].root, document.relative_path),
         text=document.text,
         frontmatter=readonly_mapping(frontmatter) if frontmatter is not None else None,
         links=tuple(
