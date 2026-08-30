@@ -94,13 +94,25 @@ Applications that already own workspace configuration can call the typed
 `lint_workspace` entrypoint without repeating INI discovery:
 
 ```python
-from locus_md import lint_workspace
-from locus_md.config import load_config
+from pathlib import Path
 
-workspace = load_config(explicit=".locus/config.ini")
+from locus_md import GlobalConfig, SurfaceConfig, WorkspaceConfig, lint_workspace
+
+workspace = WorkspaceConfig(
+    config_path=Path(".locus/config.ini"),
+    workspace_root=Path("."),
+    global_config=GlobalConfig(schema=1, surfaces=("docs",)),
+    surfaces={"docs": SurfaceConfig(name="docs", root="docs", include=("**/*.md",))},
+    providers={},
+    contracts={},
+    rules={},
+    config_digest="caller-owned-digest",
+)
 report = lint_workspace(workspace, surfaces={"docs"}, strict=True)
 ```
 
+The package root exports the three workspace construction types used by this
+example. They are aliases of the dataclasses in `locus_md.models`.
 `lint_workspace` accepts an existing `WorkspaceConfig`, optional surface and
 strict controls, and an optional `PluginRegistry`. It returns the normal
 `Report`. It does not discover or parse configuration. The existing `lint`
@@ -240,7 +252,7 @@ Network access must be explicitly permitted when `network=explicit`.
 
 ```yaml
 - repo: https://example.invalid/locus-md
-  rev: v0.2.0
+  rev: v0.2.1
   hooks:
     - id: locus-md-lint
 ```

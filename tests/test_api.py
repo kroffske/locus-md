@@ -4,10 +4,47 @@ from pathlib import Path
 
 import pytest
 
+import locus_md
 import locus_md.api as api
-from locus_md import lint_workspace as public_lint_workspace
+from locus_md import GlobalConfig, SurfaceConfig, WorkspaceConfig, lint_workspace as public_lint_workspace
 from locus_md.config import load_config
-from locus_md.models import Report, RunState
+from locus_md.models import GlobalConfig as ModelGlobalConfig
+from locus_md.models import Report, RunState, SurfaceConfig as ModelSurfaceConfig
+from locus_md.models import WorkspaceConfig as ModelWorkspaceConfig
+
+
+def test_public_workspace_types_construct_and_lint_without_loading(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    (tmp_path / "docs").mkdir()
+    (tmp_path / "docs" / "index.md").write_text("# Index\n", encoding="utf-8")
+    workspace = WorkspaceConfig(
+        config_path=tmp_path / ".locus" / "config.ini",
+        workspace_root=tmp_path,
+        global_config=GlobalConfig(schema=1, surfaces=("docs",)),
+        surfaces={
+            "docs": SurfaceConfig(
+                name="docs",
+                root="docs",
+                include=("**/*.md",),
+                indexes=("index.md",),
+                require_reachable=True,
+            )
+        },
+        providers={},
+        contracts={},
+        rules={},
+        config_digest="constructed-for-test",
+    )
+    monkeypatch.setattr(api, "load_workspace", lambda **_: pytest.fail("embedded lint must not load config"))
+    monkeypatch.setattr(api, "load_config", lambda **_: pytest.fail("embedded lint must not parse config"))
+
+    report = public_lint_workspace(workspace)
+
+    assert WorkspaceConfig is ModelWorkspaceConfig
+    assert GlobalConfig is ModelGlobalConfig
+    assert SurfaceConfig is ModelSurfaceConfig
+    assert {"WorkspaceConfig", "GlobalConfig", "SurfaceConfig"}.issubset(locus_md.__all__)
+    assert isinstance(report, Report)
+    assert report.state == RunState.PASSED
 
 
 def test_lint_workspace_uses_supplied_config_without_loading(monkeypatch: pytest.MonkeyPatch) -> None:

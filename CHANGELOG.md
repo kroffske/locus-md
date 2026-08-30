@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+
+- Export `WorkspaceConfig`, `GlobalConfig`, and `SurfaceConfig` from the
+  package root for embedded callers.
+- Replace the tracked wheel snapshot with the 0.2.1 package build.
+
 ## 0.2.0
 
 - Expose `lint_workspace` from the package root while preserving the existing
