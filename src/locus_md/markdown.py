@@ -13,6 +13,7 @@ from .utils import digest_bytes, display_surface_path
 
 _MARKER_RE = re.compile(r"^\s*<!--\s*locus:([a-z][a-z0-9-]{0,31})\s+([a-z0-9][a-z0-9._-]{0,31})\s+(begin|end)\s*-->\s*$")
 _LOCUS_COMMENT_RE = re.compile(r"<!--\s*locus:", re.IGNORECASE)
+_FOREIGN_LOCUS_MARKER_RE = re.compile(r"<!--\s*locus:[a-z][a-z0-9-]{0,31}(?::[^\s>]+)+", re.IGNORECASE)
 _FENCE_OPEN_RE = re.compile(r"^( {0,3})(`{3,}|~{3,})(.*)$")
 
 
@@ -202,7 +203,7 @@ def scan_managed_blocks(text: str, *, display_path: str, surface_name: str) -> t
                     )
                 )
                 active = None
-        elif _LOCUS_COMMENT_RE.search(content):
+        elif _LOCUS_COMMENT_RE.search(content) and not _FOREIGN_LOCUS_MARKER_RE.search(content):
             findings.append(Finding(code="DOC-BLOCK-006", message="malformed locus managed-block marker", severity=Severity.ERROR,
                                     path=display_path, line=line_number, surface=surface_name))
         offset += len(line)

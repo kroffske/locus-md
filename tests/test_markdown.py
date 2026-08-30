@@ -36,3 +36,15 @@ def test_unclosed_nested_and_duplicate_markers_are_reported() -> None:
 def test_malformed_locus_marker_is_reported() -> None:
     _, findings = scan_managed_blocks("<!-- locus:Bad missing -->\n", display_path="docs/a.md", surface_name="docs")
     assert [finding.code for finding in findings] == ["DOC-BLOCK-006"]
+
+
+def test_colon_namespaced_registry_markers_are_foreign_and_ignored() -> None:
+    text = "<!-- locus:nav:v1:begin -->\ncontent\n<!-- locus:nav:v1:end -->\n"
+    blocks, findings = scan_managed_blocks(text, display_path="AGENTS.md", surface_name="root")
+    assert blocks == ()
+    assert findings == []
+
+
+def test_whitespace_locus_marker_remains_malformed() -> None:
+    _, findings = scan_managed_blocks("<!-- locus:nav malformed -->\n", display_path="AGENTS.md", surface_name="root")
+    assert [finding.code for finding in findings] == ["DOC-BLOCK-006"]
