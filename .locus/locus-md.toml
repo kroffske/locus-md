@@ -1,0 +1,186 @@
+[locus-md]
+schema = 1
+surfaces = ["root", "docs"]
+strict = true
+lock_file = ".locus/docs.lock.json"
+cache_dir = ".locus/cache/locus-md"
+network = "deny"
+unverified = "fail"
+
+[locus-md.surface.root]
+root = "."
+include = ["README.md", "AGENTS.md", "ARCHITECTURE.md"]
+index = ["README.md"]
+frontmatter = "optional"
+
+[locus-md.surface.docs]
+root = "docs"
+include = ["**/*.md"]
+index = ["index.md"]
+frontmatter = "required"
+frontmatter_schema = "schemas/document.schema.json"
+require_reachable = true
+follow_symlinks = false
+default_provider = "project-status"
+
+[locus-md.document.readme]
+surface = "root"
+path = "README.md"
+description = "Human entry point for installing and using locus-md."
+guidance = "Lead with the smallest successful check before advanced integrations."
+
+[locus-md.document.readme.sections.first-check]
+heading = "First check"
+required = true
+guidance = "Show one copy-pasteable core-only installation and validation path."
+
+[locus-md.document.agents]
+surface = "root"
+path = "AGENTS.md"
+description = "Repository contract and navigation for coding agents."
+guidance = "Keep commands, boundaries, generated surfaces, and navigation current."
+
+[locus-md.document.agents.sections.purpose]
+heading = "Purpose"
+required = true
+guidance = "State the package boundary and what authored prose remains free-form."
+
+[locus-md.document.architecture]
+surface = "root"
+path = "ARCHITECTURE.md"
+description = "Compact ownership and execution map for locus-md."
+guidance = "Explain responsibility boundaries without duplicating the reader guides."
+
+[locus-md.document.architecture.sections.boundary]
+heading = "locus-md architecture"
+required = true
+guidance = "Keep the high-level data flow and module ownership accurate."
+
+[locus-md.document.docs-agents]
+surface = "docs"
+path = "AGENTS.md"
+description = "Read order and authoring rules for the evergreen documentation tree."
+guidance = "Keep the reader path and documentation ownership rules current."
+
+[locus-md.document.docs-agents.sections.reading-order]
+heading = "Reading order"
+required = true
+guidance = "List the scenario-first path through the maintained documentation."
+
+[locus-md.document.index]
+surface = "docs"
+path = "index.md"
+description = "Curated entry point for the locus-md documentation journey."
+guidance = "Start with the core check, then link concepts in reader order."
+
+[locus-md.document.index.sections.start-here]
+heading = "Start here"
+required = true
+guidance = "Point new users to installation, configuration, and document modeling."
+
+[locus-md.document.getting-started]
+surface = "docs"
+path = "getting-started.md"
+description = "Core-only installation and first successful locus-md check."
+guidance = "Keep the first run dependency-light and copy-pasteable."
+
+[locus-md.document.getting-started.sections.install-command]
+heading = "1. Install the command"
+required = true
+guidance = "Name the prerequisite and the supported installation command."
+
+[locus-md.document.configuration]
+surface = "docs"
+path = "configuration.md"
+description = "Configuration discovery, surfaces, and global locus-md settings."
+guidance = "Explain each setting through the decision it enables."
+
+[locus-md.document.configuration.sections.discovery]
+heading = "Discovery and environment override"
+required = true
+guidance = "Explain explicit path, LOCUS_MD_CONFIG, and upward discovery order."
+
+[locus-md.document.document-model]
+surface = "docs"
+path = "document-model.md"
+description = "Document identity, metadata, required sections, and guidance."
+guidance = "Show how folders become explicit document contracts without prose templating."
+
+[locus-md.document.document-model.sections.declare-document]
+heading = "Declare a document"
+required = true
+guidance = "Explain safe paths, descriptions, stable ids, and missing-document findings."
+
+[locus-md.document.rules-and-plugins]
+surface = "docs"
+path = "rules-and-plugins.md"
+description = "Built-in checks, declarative TOML, providers, contracts, and Python rules."
+guidance = "Keep executable plug-ins visibly separate from declarative configuration."
+
+[locus-md.document.rules-and-plugins.sections.built-in-checks]
+heading = "1. Built-in checks"
+required = true
+guidance = "Describe deterministic checks that need no installed plug-in."
+
+[locus-md.document.change-impact]
+surface = "docs"
+path = "change-impact.md"
+description = "Read-only Git impact review for changed, renamed, and deleted documents."
+guidance = "Explain current-configuration classification and inbound dependents honestly."
+
+[locus-md.document.change-impact.sections.report]
+heading = "What the report means"
+required = true
+guidance = "Define changed paths, deleted targets, dependents, and configuration changes."
+
+[locus-md.document.cli]
+surface = "docs"
+path = "cli.md"
+description = "Command reference, output formats, permissions, and exit states."
+guidance = "Keep command names and safety boundaries aligned with the live CLI."
+
+[locus-md.document.cli.sections.configuration]
+heading = "Configuration and orientation"
+required = true
+guidance = "Start with commands that discover and explain the active contract."
+
+[locus-md.document.implementation-status]
+surface = "docs"
+path = "implementation-status.md"
+description = "Current managed dogfood snapshot and deliberately deferred scope."
+guidance = "Describe only current managed evidence and explicitly deferred capabilities."
+
+[locus-md.document.implementation-status.sections.deferred]
+heading = "Deliberately deferred"
+required = true
+guidance = "Keep deferred scope separate from the managed status table."
+
+[locus-md.document.system-design]
+surface = "docs"
+path = "system-design/locus-md/locus-md.md"
+description = "Responsibility boundaries and request flow for the locus-md runtime."
+guidance = "Explain ownership and write boundaries at the level users and maintainers need."
+
+[locus-md.document.system-design.sections.request-flow]
+heading = "Request flow"
+required = true
+guidance = "Keep the high-level flow synchronized with the public behavior."
+
+[locus-md.provider.project-status]
+adapter = "file-json"
+path = "data/project-status.json"
+required = true
+network = false
+
+[locus-md.contract.implementation-status]
+surface = "docs"
+path = "implementation-status.md"
+block_kind = "milestone"
+block_id = "dogfood"
+schema = "task-table.v1"
+mode = "projection"
+provider = "project-status"
+selector = { milestone = "dogfood" }
+renderer = "task-table.v1"
+severity = "error"
+required = true

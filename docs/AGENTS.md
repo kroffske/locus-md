@@ -1,4 +1,6 @@
 ---
+schema: locus.doc.v1
+id: docs.agents
 title: locus-md Documentation Rules
 type: guide
 status: active
@@ -6,18 +8,23 @@ owner: team:locus-md
 tags: [documentation, authoring]
 ---
 
-# locus-md Documentation
+# locus-md documentation
 
-This file is the local contract for documentation changes. Keep each page
-self-contained, link it from the public index, and verify it with `locus-md`.
+This directory is the evergreen reader surface. Keep pages self-contained,
+use standard front matter, link every page from `index.md`, and verify examples
+against the standalone CLI.
 
-Reading order:
+## Reading order
 
-1. `index.md` — documentation map.
-2. `design/00-executive-summary.md` — product boundary.
-3. `design/01-product-requirements.md` — verifiable requirements.
-4. `design/02-system-design.md` — components and dependencies.
-5. `implementation-status.md` — current implemented surface.
+1. [Getting started](getting-started.md) — install and run one core check.
+2. [Configuration](configuration.md) — define surfaces and discovery.
+3. [Document model](document-model.md) — declare documents, sections, and metadata.
+4. [Rules and plug-ins](rules-and-plugins.md) — understand built-ins, providers, and adapters.
+5. [Change impact](change-impact.md) — review changed or deleted documents.
+6. [CLI reference](cli.md) — find exact commands, output, and exit behavior.
+7. [System design](system-design/locus-md/locus-md.md) — inspect ownership and boundaries.
+8. [Implementation status](implementation-status.md) — read the current dogfood snapshot.
 
-`docs/index.md` remains the single public entry point. Add every new page to
-the index in the same change. locus-md validates frontmatter and links.
+`locus-md` validates front matter, links, reachability, managed blocks, and
+declared documents. The generic `locus docs` command validates this
+repository's documentation format and freshness metadata; it is separate.

@@ -6,31 +6,29 @@ type: index
 status: active
 owner: team:locus-md
 tags: [documentation, navigation]
-updated: "2026-08-28T00:27:13Z"
-source_commit: "6ecd7cfe5fd1"
-update_event: "user_request"
-description: "Validated and connected to locus-md navigation and self-validation contracts."
 ---
 
-# locus-md Documentation
+# locus-md documentation
 
-locus-md validates semantic contracts over Markdown. Start with the product
-boundary, then continue to requirements, architecture, and implementation.
+This is the user-facing path through locus-md. Start with a small core-only
+configuration. Add document requirements next. Learn providers and plug-ins
+when a real integration needs them.
 
 ## Start here
 
-- [Product decision](design/00-executive-summary.md)
-- [Product requirements](design/01-product-requirements.md)
-- [System design](design/02-system-design.md)
-- [Current implementation](implementation-status.md)
+- [Getting started](getting-started.md) — install and run the first check.
+- [Configuration](configuration.md) — choose folders and configure discovery.
+- [Document model](document-model.md) — describe documents, metadata, sections, and guidance.
 
-## Contracts and integration
+## Extend the contract
 
-- [TOML configuration](design/03-configuration-spec.md)
-- [Document contract model](design/04-document-contract-model.md)
-- [CLI and diagnostics](design/05-cli-and-diagnostics.md)
-- [Provider and plugin API](design/06-provider-plugin-api.md)
+- [Rules and plug-ins](rules-and-plugins.md) — separate built-ins, TOML, providers, contracts, and Python rules.
+- [Change impact](change-impact.md) — see which documents may need review after a Git change.
+- [CLI reference](cli.md) — commands, formats, permissions, and exit codes.
 
-## Delivery plan
+## Design and status
 
-- [Implementation plan](design/08-implementation-plan.md)
+- [System design](system-design/locus-md/locus-md.md) — runtime responsibilities and data flow.
+- [Implementation status](implementation-status.md) — the current self-validation snapshot.
+- [Repository architecture](../ARCHITECTURE.md) — compact boundary map.
+- [Documentation rules](AGENTS.md) — read order and authoring ownership.

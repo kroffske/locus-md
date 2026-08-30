@@ -1,76 +1,113 @@
+---
+title: locus-md
+type: overview
+status: active
+owner: team:locus-md
+tags: [markdown, documentation, contracts]
+---
+
 # locus-md
 
-locus-md is a standalone semantic documentation linter for Markdown repositories. It keeps authored prose free-form while validating document envelopes, repository links, managed blocks, and deterministic projections against declared providers.
+locus-md checks the structure and relationships of Markdown documentation. It
+keeps prose authored by people, while making the parts that must stay true
+explicit and deterministic.
 
-## Implemented through 0.3.0
+The mental model is:
 
-- dedicated `.locus/locus.md.toml` TOML configuration;
-- configurable documentation surfaces;
-- YAML frontmatter validated by JSON Schema;
-- local Markdown links and reachability checks;
-- fenced-code-aware managed block scanner;
-- contract bindings and stable findings;
-- built-in `file-json` and snapshot providers;
-- deterministic `task-table.v1` projections;
-- `lint`, `verify`, `sync --check`, `sync --write`, `contracts list`, `config validate/show`, `doctor`, and `init`;
-- sidecar `.locus/docs.lock.json` drift evidence;
-- byte-preserving span rewrites, atomic replacement, and write-conflict checks;
-- Python entry-point extension boundaries for providers and contract handlers.
-- read-only `verify` rule plugins over immutable whole-document projections.
+```text
+folders (surfaces) -> named documents -> front matter and sections
+  -> links and managed blocks -> deterministic checks
+```
 
-## Quick start
+The configuration lives in `.locus/locus-md.toml` under `[locus-md]`. The
+standalone command is `locus-md`; it does not read the Locus runtime config.
+
+## First check
+
+Install the package, then run the check from a repository containing the
+canonical configuration:
 
 ```bash
 uv tool install .
-cd examples/basic
 locus-md config validate
 locus-md lint
+```
+
+`config validate` checks TOML shape and installed plug-in references. `lint`
+scans selected files, front matter, links, reachability, managed blocks, and
+declared documents. It does not contact providers.
+
+For provider-backed checks, make permission explicit:
+
+```bash
 locus-md verify --offline
 locus-md sync --check --offline
 ```
 
-The default discovery path is `.locus/locus.md.toml`. The file uses only the
-`[locus.md]` namespace. The separate Locus runtime `.locus/config.toml` is not
-read by locus-md. Set `LOCUS_MD_CONFIG` to override discovery.
+`verify` adds provider assertions and read-only rules. Configured read-only
+rules also execute during both `sync --check` and `sync --write`; static
+`lint` does not execute them. `sync --check` shows deterministic
+managed-block patches without writing. Only `sync --write` may update a
+managed document block or lock evidence.
 
-`locus-md` is the standalone command. It does not route through the `locus` CLI.
-
-## Managed block
-
-```md
-<!-- locus:milestone tasks begin -->
-| Task | Title | Status |
-|---|---|---|
-| T-101 | Create repository skeleton | done |
-<!-- locus:milestone tasks end -->
-```
-
-Provider, selector, schema, mode, and renderer remain in the tracked TOML
-contract rather than in the marker.
-
-## Status
-
-This is a runnable alpha/MVP implementation. The repository dogfoods its own
-contract through `.locus/locus.md.toml`; run `locus-md lint`, `locus-md verify
---offline`, and `locus-md sync --check --offline` from the repository root.
-Remote GitHub and Linear adapters, SARIF, changed-files mode, and bidirectional
-synchronization remain intentionally out of scope.
-
-## Read-only rule plugins
-
-An installed package can expose a rule through the `locus_md.rules` entry-point
-group. A configured rule runs once per selected document during `verify`,
-`sync --check`, and `sync --write`. Static `lint` never runs rules. Rules return
-findings only and cannot contribute patches.
+## The configuration file
 
 ```toml
-[locus.md.rule.policy-coverage]
-adapter = "policy-coverage"
-phase = "verify"
-surface = "docs"
-severity = "error"
-options = { registry = "docs/policies.json" }
+[locus-md]
+schema = 1
+surfaces = ["root", "docs"]
+network = "deny"
+
+[locus-md.surface.root]
+root = "."
+include = ["README.md", "AGENTS.md"]
+index = ["README.md"]
+frontmatter = "optional"
+
+[locus-md.surface.docs]
+root = "docs"
+include = ["**/*.md"]
+index = ["index.md"]
+frontmatter = "required"
+require_reachable = true
+
+[locus-md.document.readme]
+surface = "root"
+path = "README.md"
+description = "Human entry point for the project."
+guidance = "Explain installation and the first successful check."
+
+[locus-md.document.readme.sections.first-check]
+heading = "First check"
+required = true
+guidance = "Show one copy-pasteable command sequence."
+
+[locus-md.document.agents]
+surface = "root"
+path = "AGENTS.md"
+description = "Repository contract and navigation for coding agents."
 ```
 
-See `docs/design/06-provider-plugin-api.md` for the public Python protocol and
-the aggregate failure policy.
+The root `AGENTS.md` declaration is intentional. It is first-class managed
+documentation, but keeps its host-compatible shape without YAML front matter.
+That exact root path is the only envelope exception. A nested `AGENTS.md` is
+an ordinary document and still needs YAML when declared.
+
+Read [Getting started](docs/getting-started.md), then
+[Configuration](docs/configuration.md) and [Document model](docs/document-model.md).
+
+## Extensions and boundaries
+
+Built-in checks cover file selection, front matter, local links, index
+reachability, declared documents, required headings, managed blocks, and
+provider-backed contracts. TOML declares inputs; it is not an executable rule
+language.
+
+Installed Python packages can add providers, contract handlers, or read-only
+rules through `locus_md.providers`, `locus_md.contracts`, or `locus_md.rules`.
+An `adapter` names an installed entry point. It is not inline code or a network
+endpoint. See [Rules and plug-ins](docs/rules-and-plugins.md).
+
+`network` controls provider I/O only. Guidance is authoring data for a human or
+LLM; it cannot change findings or pass/fail state. There is no automatic prose
+generation and no arbitrary executable DSL in TOML.
