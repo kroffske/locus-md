@@ -13,7 +13,7 @@ Verified in the build environment on 2026-08-31.
 - Paired integration suite: 67 tests passed with zero failures, errors, or skips.
 - Repeated installed `config validate`, `lint`, `verify --offline`, and `sync --check --offline` returned stable normalized results without mutating fixtures.
 - The canonical configuration is `.locus/locus-md.toml` with `[locus-md]`; the legacy filename and dotted namespace return `CFG-061` without writes.
-- Independent quality review passed at 8/10 with all five review questions closed and the Python policy passing.
+- Independent quality review passed at 8/10 with all six review questions closed and the Python policy passing.
 
 Wheel SHA-256:
 
