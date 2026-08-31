@@ -70,8 +70,14 @@ handler-declared capabilities before capture. The built-in
 providers are `file-json` and `snapshot`; an embedding application may also
 call `PluginRegistry.register_provider` with an explicit adapter name.
 
-Provider option findings are retained, and invalid configuration or provider
-exceptions prevent a snapshot and produce `PROV-001` with `UNVERIFIED` state.
+Warning-only findings from `validate_config` are not emitted and do not stop
+capture. When validation contains a failure, those validation findings are
+appended, capture stops, and `PROV-001` with `UNVERIFIED` state is added.
+Provider exceptions likewise prevent a snapshot and produce `PROV-001` with
+`UNVERIFIED` state. A direct Python caller sees handler `plan`/`validate`
+exceptions propagate. The CLI maps known `LocusMdError` values in its top-level
+handler; unexpected exceptions become `INTERNAL-001` and exit 5, with a
+traceback only when `--debug` is set.
 
 ## Contract protocol
 
@@ -100,10 +106,12 @@ body written by a person. Rendering must be deterministic and must not open a
 provider or write a file. A handler's `required_capabilities` is checked
 before the provider session captures its planned queries.
 
-The engine translates a handler `render` exception into a failed
-`CONTRACT-002` finding. Handler `plan` and `validate` exceptions currently
-propagate to the command-level error handler; they are not silently converted
-to a local contract finding.
+The engine translates a handler `render` exception into a `CONTRACT-002`
+finding with the binding's severity; it does not set an explicit
+`RunState.FAILED` on that finding. Handler `plan` and `validate` exceptions
+currently propagate to a direct Python caller; the CLI maps them through its
+command-level error handler rather than converting them to a local contract
+finding.
 
 ## Rule protocol
 

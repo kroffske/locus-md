@@ -38,6 +38,31 @@ class PlannedContract:
     queries: list[ProviderQuery]
 
 
+def _validate_declared_documents(
+    config: WorkspaceConfig,
+    documents: Mapping[tuple[str, str], DocumentRecord],
+    selected_surfaces: set[str],
+) -> list[Finding]:
+    findings: list[Finding] = []
+    for declaration in config.documents.values():
+        if declaration.surface not in selected_surfaces:
+            continue
+        key = (declaration.surface, declaration.path)
+        display_path = display_surface_path(config.surfaces[declaration.surface].root, declaration.path)
+        document = documents.get(key)
+        if document is None:
+            findings.append(Finding(code="DOC-DECL-001", message=f"declared document {declaration.name!r} does not exist", severity=Severity.ERROR,
+                                    path=display_path, surface=declaration.surface, contract_id=declaration.name,
+                                    details={"document": declaration.name, "surface": declaration.surface, "path": declaration.path}))
+            continue
+        for section in declaration.sections.values():
+            if section.required and section.heading not in document.headings:
+                findings.append(Finding(code="DOC-SECTION-001", message=f"required section {section.heading!r} is missing",
+                                        severity=Severity.ERROR, path=display_path, surface=declaration.surface, contract_id=declaration.name,
+                                        details={"document": declaration.name, "section": section.name, "heading": section.heading}))
+    return findings
+
+
 class Engine:
     def __init__(self, config: WorkspaceConfig, *, registry: PluginRegistry | None = None) -> None:
         self.config = config
@@ -86,22 +111,7 @@ class Engine:
                 documents[document.key] = document
         selected_surfaces = surfaces or set(self.config.global_config.surfaces)
         findings.extend(validate_graph(self.config, documents, selected_surfaces=selected_surfaces))
-        for declaration in self.config.documents.values():
-            if declaration.surface not in selected_surfaces:
-                continue
-            key = (declaration.surface, declaration.path)
-            display_path = display_surface_path(self.config.surfaces[declaration.surface].root, declaration.path)
-            document = documents.get(key)
-            if document is None:
-                findings.append(Finding(code="DOC-DECL-001", message=f"declared document {declaration.name!r} does not exist", severity=Severity.ERROR,
-                                        path=display_path, surface=declaration.surface, contract_id=declaration.name,
-                                        details={"document": declaration.name, "surface": declaration.surface, "path": declaration.path}))
-                continue
-            for section in declaration.sections.values():
-                if section.required and section.heading not in document.headings:
-                    findings.append(Finding(code="DOC-SECTION-001", message=f"required section {section.heading!r} is missing",
-                                            severity=Severity.ERROR, path=display_path, surface=declaration.surface, contract_id=declaration.name,
-                                            details={"document": declaration.name, "section": section.name, "heading": section.heading}))
+        findings.extend(_validate_declared_documents(self.config, documents, selected_surfaces))
         blocks: dict[tuple[str, str, str, str], tuple[DocumentRecord, ManagedBlock]] = {}
         configured_keys = {binding.key: binding for binding in self.config.contracts.values() if binding.surface in selected_surfaces}
         for document in documents.values():
