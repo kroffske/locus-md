@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any, Literal, Mapping, Sequence
 
 from .utils import digest_json, digest_text
 
@@ -130,9 +130,28 @@ class ContractBinding:
 class RuleConfig:
     name: str
     adapter: str
+    phase: Literal["verify"]
     surface: str | None
     severity: Severity
     options: Mapping[str, Any]
+
+
+@dataclass(frozen=True, slots=True)
+class DocumentSectionConfig:
+    name: str
+    heading: str
+    required: bool = True
+    guidance: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class DocumentConfig:
+    name: str
+    surface: str
+    path: str
+    description: str
+    guidance: str | None = None
+    sections: Mapping[str, DocumentSectionConfig] = field(default_factory=dict)
 
 
 @dataclass(frozen=True, slots=True)
@@ -145,6 +164,7 @@ class WorkspaceConfig:
     contracts: Mapping[str, ContractBinding]
     rules: Mapping[str, RuleConfig]
     config_digest: str
+    documents: Mapping[str, DocumentConfig] = field(default_factory=dict)
 
     def normalized(self, *, redact: bool = False) -> dict[str, Any]:
         providers: dict[str, Any] = {}
@@ -157,7 +177,7 @@ class WorkspaceConfig:
             providers[name] = {"adapter": provider.adapter, "required": provider.required, "network": provider.network,
                                "snapshot_file": provider.snapshot_file, "cache_ttl": provider.cache_ttl, "options": options}
         return {
-            "schema": "locus-md.config.normalized.v1",
+            "schema": "locus-md.config.normalized.v2",
             "config_path": str(self.config_path),
             "workspace_root": str(self.workspace_root),
             "global": {
@@ -205,7 +225,31 @@ class WorkspaceConfig:
                 for name, binding in sorted(self.contracts.items())
             },
             "rules": {
-                name: {"adapter": rule.adapter, "surface": rule.surface, "severity": rule.severity.value, "options": dict(rule.options)} for name, rule in sorted(self.rules.items())
+                name: {
+                    "adapter": rule.adapter,
+                    "phase": rule.phase,
+                    "surface": rule.surface,
+                    "severity": rule.severity.value,
+                    "options": dict(rule.options),
+                }
+                for name, rule in sorted(self.rules.items())
+            },
+            "documents": {
+                name: {
+                    "surface": document.surface,
+                    "path": document.path,
+                    "description": document.description,
+                    "guidance": document.guidance,
+                    "sections": {
+                        section_name: {
+                            "heading": section.heading,
+                            "required": section.required,
+                            "guidance": section.guidance,
+                        }
+                        for section_name, section in document.sections.items()
+                    },
+                }
+                for name, document in sorted(self.documents.items())
             },
             "config_digest": self.config_digest,
         }
@@ -256,6 +300,7 @@ class DocumentRecord:
     frontmatter: FrontmatterRecord
     links: tuple[LinkRecord, ...]
     blocks: tuple[ManagedBlock, ...]
+    headings: tuple[str, ...] = ()
 
     @property
     def key(self) -> tuple[str, str]:

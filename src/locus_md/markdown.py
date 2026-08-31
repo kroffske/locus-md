@@ -9,11 +9,33 @@ from jsonschema import Draft202012Validator
 from markdown_it import MarkdownIt
 
 from .models import DocumentRecord, Finding, FrontmatterRecord, LinkRecord, ManagedBlock, Severity, SurfaceConfig, WorkspaceConfig
-from .utils import digest_bytes
+from .utils import digest_bytes, display_surface_path
 
 _MARKER_RE = re.compile(r"^\s*<!--\s*locus:([a-z][a-z0-9-]{0,31})\s+([a-z0-9][a-z0-9._-]{0,31})\s+(begin|end)\s*-->\s*$")
 _LOCUS_COMMENT_RE = re.compile(r"<!--\s*locus:", re.IGNORECASE)
+_FOREIGN_LOCUS_MARKER_RE = re.compile(r"<!--\s*locus:[a-z][a-z0-9-]{0,31}(?::[^\s>]+)+", re.IGNORECASE)
 _FENCE_OPEN_RE = re.compile(r"^( {0,3})(`{3,}|~{3,})(.*)$")
+
+
+def normalize_heading(value: str) -> str:
+    return " ".join(value.split())
+
+
+def extract_headings(text: str) -> tuple[str, ...]:
+    """Return visible heading text using markdown-it's token stream."""
+    headings: list[str] = []
+    tokens = MarkdownIt("commonmark").parse(text)
+    for index, token in enumerate(tokens):
+        if token.type != "heading_open" or index + 1 >= len(tokens):
+            continue
+        inline = tokens[index + 1]
+        if inline.type != "inline" or not inline.children:
+            continue
+        visible = "".join(child.content if child.type != "softbreak" else " " for child in inline.children)
+        normalized = normalize_heading(visible)
+        if normalized:
+            headings.append(normalized)
+    return tuple(headings)
 
 
 class _NoTimestampSafeLoader(yaml.SafeLoader):
@@ -57,9 +79,12 @@ def parse_frontmatter(text: str, surface: SurfaceConfig, config: WorkspaceConfig
     findings: list[Finding] = []
     lines = text.splitlines(keepends=True)
     has_frontmatter = bool(lines and _line_without_newline(lines[0]).strip() == "---")
-    display_path = f"{surface.root}/{relative_path}"
+    display_path = display_surface_path(surface.root, relative_path)
+    declaration = next((item for item in config.documents.values() if item.surface == surface.name and item.path == relative_path), None)
+    envelope_exception = declaration is not None and surface.name == "root" and relative_path == "AGENTS.md"
+    frontmatter_required = False if envelope_exception else bool(declaration) or surface.frontmatter == "required"
     if not has_frontmatter:
-        if surface.frontmatter == "required":
+        if frontmatter_required:
             findings.append(Finding(code="DOC-ENV-001", message="frontmatter is required", severity=Severity.ERROR, path=display_path, line=1, surface=surface.name))
         return FrontmatterRecord(data=None), findings
     if surface.frontmatter == "forbidden":
@@ -178,7 +203,7 @@ def scan_managed_blocks(text: str, *, display_path: str, surface_name: str) -> t
                     )
                 )
                 active = None
-        elif _LOCUS_COMMENT_RE.search(content):
+        elif _LOCUS_COMMENT_RE.search(content) and not _FOREIGN_LOCUS_MARKER_RE.search(content):
             findings.append(Finding(code="DOC-BLOCK-006", message="malformed locus managed-block marker", severity=Severity.ERROR,
                                     path=display_path, line=line_number, surface=surface_name))
         offset += len(line)
@@ -212,7 +237,7 @@ def extract_links(text: str, *, display_path: str, surface_name: str) -> tuple[t
 
 
 def scan_document(config: WorkspaceConfig, surface: SurfaceConfig, relative_path: str, absolute_path: Path) -> tuple[DocumentRecord | None, list[Finding]]:
-    display_path = f"{surface.root}/{relative_path}"
+    display_path = display_surface_path(surface.root, relative_path)
     try:
         raw = absolute_path.read_bytes()
     except OSError as exc:
@@ -226,7 +251,11 @@ def scan_document(config: WorkspaceConfig, surface: SurfaceConfig, relative_path
     frontmatter, frontmatter_findings = parse_frontmatter(text, surface, config, relative_path)
     blocks, block_findings = scan_managed_blocks(text, display_path=display_path, surface_name=surface.name)
     links, link_findings = extract_links(text, display_path=display_path, surface_name=surface.name)
+    try:
+        headings = extract_headings(text)
+    except Exception as exc:
+        return None, [Finding(code="DOC-ENV-090", message=f"Markdown parser failed: {exc}", severity=Severity.ERROR, path=display_path, surface=surface.name)]
     record = DocumentRecord(surface=surface.name, relative_path=relative_path, absolute_path=absolute_path, text=text,
                             source_digest=digest_bytes(raw), newline=_detect_newline(text), bom=bom, frontmatter=frontmatter,
-                            links=links, blocks=blocks)
+                            links=links, blocks=blocks, headings=headings)
     return record, [*frontmatter_findings, *block_findings, *link_findings]

@@ -1,53 +1,115 @@
+---
+title: locus-md
+type: overview
+status: active
+owner: team:locus-md
+tags: [markdown, documentation, contracts]
+---
+
 # locus-md
 
-locus-md is a standalone semantic documentation linter for Markdown repositories. It keeps authored prose free-form while validating document envelopes, repository links, managed blocks, and deterministic projections against declared providers.
+locus-md checks the structure and relationships of Markdown documentation. It
+keeps prose authored by people, while making the parts that must stay true
+explicit and deterministic.
 
-## Implemented in 0.1.0
+The mental model is:
 
-- isolated `[locus.docs*]` INI configuration;
-- configurable documentation surfaces;
-- YAML frontmatter validated by JSON Schema;
-- local Markdown links and reachability checks;
-- fenced-code-aware managed block scanner;
-- contract bindings and stable findings;
-- built-in `file-json` and snapshot providers;
-- deterministic `task-table.v1` projections;
-- `lint`, `verify`, `sync --check`, `sync --write`, `contracts list`, `config validate/show`, `doctor`, and `init`;
-- sidecar `.locus/docs.lock.json` drift evidence;
-- byte-preserving span rewrites, atomic replacement, and write-conflict checks;
-- Python entry-point extension boundaries for providers and contract handlers.
+```text
+folders (surfaces) -> named documents -> front matter and sections
+  -> links and managed blocks -> deterministic checks
+```
 
-## Quick start
+The configuration lives in `.locus/locus-md.toml` under `[locus-md]`. The
+standalone command is `locus-md`; it does not read the Locus runtime config.
+
+## First check
+
+Install the package, then run the check from a repository containing the
+canonical configuration:
 
 ```bash
 uv tool install .
-cd examples/basic
 locus-md config validate
 locus-md lint
+```
+
+`config validate` checks TOML shape and installed plug-in references. `lint`
+scans selected files, front matter, links, reachability, managed blocks, and
+declared documents. It does not contact providers.
+
+For provider-backed checks, make permission explicit:
+
+```bash
 locus-md verify --offline
 locus-md sync --check --offline
 ```
 
-The default discovery path is `.locus/config.ini`. A shared INI may contain unrelated Locus sections; locus-md reads only its own namespace.
+`verify` adds provider assertions and read-only rules. Configured read-only
+rules also execute during both `sync --check` and `sync --write`; static
+`lint` does not execute them. `sync --check` shows deterministic
+managed-block patches without writing. Only `sync --write` may update a
+managed document block or lock evidence.
 
-`locus-md` is the standalone command. It does not route through the `locus` CLI.
+## The configuration file
 
-## Managed block
+```toml
+[locus-md]
+schema = 1
+surfaces = ["root", "docs"]
+network = "deny"
 
-```md
-<!-- locus:milestone tasks begin -->
-| Task | Title | Status |
-|---|---|---|
-| T-101 | Create repository skeleton | done |
-<!-- locus:milestone tasks end -->
+[locus-md.surface.root]
+root = "."
+include = ["README.md", "AGENTS.md"]
+index = ["README.md"]
+frontmatter = "optional"
+
+[locus-md.surface.docs]
+root = "docs"
+include = ["**/*.md"]
+index = ["index.md"]
+frontmatter = "required"
+require_reachable = true
+
+[locus-md.document.readme]
+surface = "root"
+path = "README.md"
+description = "Human entry point for the project."
+guidance = "Explain installation and the first successful check."
+
+[locus-md.document.readme.sections.first-check]
+heading = "First check"
+required = true
+guidance = "Show one copy-pasteable command sequence."
+
+[locus-md.document.agents]
+surface = "root"
+path = "AGENTS.md"
+description = "Repository contract and navigation for coding agents."
 ```
 
-Provider, selector, schema, mode, and renderer remain in the tracked INI contract rather than in the marker.
+The root `AGENTS.md` declaration is intentional. It is first-class managed
+documentation, but keeps its host-compatible shape without YAML front matter.
+That exact root path is the only envelope exception. A nested `AGENTS.md` is
+an ordinary document and still needs YAML when declared.
 
-## Status
+Read [Getting started](docs/getting-started.md), then
+[Configuration](docs/configuration.md) and [Document model](docs/document-model.md).
 
-This is a runnable alpha/MVP implementation. The repository dogfoods its own
-contract through `.locus/config.ini`; run `locus-md lint`, `locus-md verify
---offline`, and `locus-md sync --check --offline` from the repository root.
-Remote GitHub and Linear adapters, SARIF, changed-files mode, and bidirectional
-synchronization remain intentionally out of scope.
+## Extensions and boundaries
+
+Built-in checks cover file selection, front matter, local links, index
+reachability, declared documents, required headings, managed blocks, and
+provider-backed contracts. TOML declares inputs; it is not an executable rule
+language.
+
+Installed Python packages can add providers, contract handlers, or read-only
+rules through `locus_md.providers`, `locus_md.contracts`, or `locus_md.rules`.
+An `adapter` names an installed entry point. It is not inline code or a network
+endpoint. Plug-ins are trusted in-process Python and are not OS-sandboxed;
+their rule protocol has no core patch API. See [Rules and plug-ins](docs/rules-and-plugins.md)
+and the [Plug-in API](docs/plugin-api.md).
+
+`network` controls provider I/O only. Guidance is authoring data for a human or
+LLM; it cannot change findings or pass/fail state. There is no automatic prose
+generation and no arbitrary executable DSL in TOML.

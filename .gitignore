@@ -20,7 +20,7 @@ dist/
 .reports/
 .local/
 .locus/*
-!.locus/config.ini
+!.locus/locus-md.toml
 !.locus/docs.lock.json
 .locus/cache/
 .locus/reports/

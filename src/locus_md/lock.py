@@ -8,7 +8,7 @@ from .utils import digest_bytes, resolve_inside
 
 
 def lock_path(config: WorkspaceConfig) -> Path:
-    return resolve_inside(config.workspace_root, config.global_config.lock_file, key="locus.docs.lock_file")
+    return resolve_inside(config.workspace_root, config.global_config.lock_file, key="locus-md.lock_file")
 
 
 def load_lock(config: WorkspaceConfig) -> tuple[LockState, list[Finding]]:

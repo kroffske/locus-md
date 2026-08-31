@@ -2,198 +2,197 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://schemas.locus-md.dev/config-normalized.v1.schema.json",
   "title": "locus-md Normalized Config v1",
+  "description": "Historical normalized configuration payload retained for v1 consumers. Current WorkspaceConfig.normalized() returns v2.",
   "type": "object",
   "required": [
     "schema",
+    "config_path",
+    "workspace_root",
+    "global",
     "surfaces",
     "providers",
-    "contracts"
+    "contracts",
+    "rules",
+    "config_digest"
   ],
   "properties": {
     "schema": {
-      "const": "locus-md.config.v1"
+      "const": "locus-md.config.normalized.v1"
     },
-    "strict": {
-      "type": "boolean"
-    },
-    "lock_file": {
+    "config_path": {
       "type": "string"
     },
-    "cache_dir": {
+    "workspace_root": {
       "type": "string"
     },
-    "network": {
-      "enum": [
-        "deny",
-        "explicit",
-        "allow"
-      ]
-    },
-    "unverified": {
-      "enum": [
-        "fail",
-        "warn",
-        "ignore"
-      ]
+    "global": {
+      "$ref": "#/$defs/global"
     },
     "surfaces": {
       "type": "object",
       "additionalProperties": {
-        "type": "object",
-        "required": [
-          "root",
-          "include"
-        ],
-        "properties": {
-          "root": {
-            "type": "string"
-          },
-          "include": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "exclude": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "index": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "frontmatter": {
-            "enum": [
-              "required",
-              "optional",
-              "forbidden"
-            ]
-          },
-          "frontmatter_schema": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "require_reachable": {
-            "type": "boolean"
-          },
-          "follow_symlinks": {
-            "type": "boolean"
-          },
-          "default_provider": {
-            "type": [
-              "string",
-              "null"
-            ]
-          }
-        },
-        "additionalProperties": false
+        "$ref": "#/$defs/surface"
       }
     },
     "providers": {
       "type": "object",
       "additionalProperties": {
-        "type": "object",
-        "required": [
-          "adapter",
-          "options"
-        ],
-        "properties": {
-          "adapter": {
-            "type": "string"
-          },
-          "required": {
-            "type": "boolean"
-          },
-          "network": {
-            "type": "boolean"
-          },
-          "snapshot_file": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "options": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          }
-        },
-        "additionalProperties": false
+        "$ref": "#/$defs/provider"
       }
     },
     "contracts": {
       "type": "object",
       "additionalProperties": {
-        "type": "object",
-        "required": [
-          "surface",
-          "path",
-          "block_kind",
-          "block_id",
-          "schema",
-          "mode"
-        ],
-        "properties": {
-          "surface": {
-            "type": "string"
-          },
-          "path": {
-            "type": "string"
-          },
-          "block_kind": {
-            "type": "string"
-          },
-          "block_id": {
-            "type": "string"
-          },
-          "schema": {
-            "type": "string"
-          },
-          "mode": {
-            "enum": [
-              "authored",
-              "projection",
-              "snapshot"
-            ]
-          },
-          "provider": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "selector": {
-            "type": "object"
-          },
-          "renderer": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "severity": {
-            "enum": [
-              "info",
-              "warning",
-              "error",
-              "fatal"
-            ]
-          },
-          "required": {
-            "type": "boolean"
-          }
-        },
-        "additionalProperties": false
+        "$ref": "#/$defs/contract"
       }
+    },
+    "rules": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/rule"
+      }
+    },
+    "config_digest": {
+      "type": "string",
+      "minLength": 1
     }
   },
-  "additionalProperties": false
+  "additionalProperties": false,
+  "$defs": {
+    "global": {
+      "type": "object",
+      "required": [
+        "schema",
+        "surfaces",
+        "strict",
+        "lock_file",
+        "cache_dir",
+        "report_dir",
+        "default_output",
+        "network",
+        "unverified"
+      ],
+      "properties": {
+        "schema": {
+          "const": 1
+        },
+        "surfaces": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "strict": {
+          "type": "boolean"
+        },
+        "lock_file": {
+          "type": "string"
+        },
+        "cache_dir": {
+          "type": "string"
+        },
+        "report_dir": {
+          "type": ["string", "null"]
+        },
+        "default_output": {
+          "enum": ["human", "json"]
+        },
+        "network": {
+          "enum": ["deny", "explicit", "allow"]
+        },
+        "unverified": {
+          "enum": ["fail", "warn", "ignore"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "surface": {
+      "type": "object",
+      "required": [
+        "root",
+        "include",
+        "exclude",
+        "indexes",
+        "frontmatter",
+        "frontmatter_schema",
+        "require_reachable",
+        "allow_external_links",
+        "follow_symlinks",
+        "default_provider"
+      ],
+      "properties": {
+        "root": {"type": "string"},
+        "include": {"type": "array", "items": {"type": "string"}},
+        "exclude": {"type": "array", "items": {"type": "string"}},
+        "indexes": {"type": "array", "items": {"type": "string"}},
+        "frontmatter": {"enum": ["required", "optional", "forbidden"]},
+        "frontmatter_schema": {"type": ["string", "null"]},
+        "require_reachable": {"type": "boolean"},
+        "allow_external_links": {"type": "boolean"},
+        "follow_symlinks": {"type": "boolean"},
+        "default_provider": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "provider": {
+      "type": "object",
+      "required": ["adapter", "required", "network", "snapshot_file", "cache_ttl", "options"],
+      "properties": {
+        "adapter": {"type": "string"},
+        "required": {"type": "boolean"},
+        "network": {"type": "boolean"},
+        "snapshot_file": {"type": ["string", "null"]},
+        "cache_ttl": {"type": ["integer", "null"]},
+        "options": {"type": "object", "additionalProperties": {"type": "string"}}
+      },
+      "additionalProperties": false
+    },
+    "contract": {
+      "type": "object",
+      "required": [
+        "surface",
+        "path",
+        "block_kind",
+        "block_id",
+        "schema",
+        "mode",
+        "provider",
+        "provider_explicit",
+        "selector",
+        "renderer",
+        "severity",
+        "required"
+      ],
+      "properties": {
+        "surface": {"type": "string"},
+        "path": {"type": "string"},
+        "block_kind": {"type": "string"},
+        "block_id": {"type": "string"},
+        "schema": {"type": "string"},
+        "mode": {"enum": ["authored", "projection", "snapshot"]},
+        "provider": {"type": ["string", "null"]},
+        "provider_explicit": {"type": "boolean"},
+        "selector": {"type": "object"},
+        "renderer": {"type": ["string", "null"]},
+        "severity": {"$ref": "#/$defs/severity"},
+        "required": {"type": "boolean"}
+      },
+      "additionalProperties": false
+    },
+    "rule": {
+      "type": "object",
+      "required": ["adapter", "phase", "surface", "severity", "options"],
+      "properties": {
+        "adapter": {"type": "string"},
+        "phase": {"const": "verify"},
+        "surface": {"type": ["string", "null"]},
+        "severity": {"$ref": "#/$defs/severity"},
+        "options": {"type": "object"}
+      },
+      "additionalProperties": false
+    },
+    "severity": {
+      "enum": ["info", "warning", "error", "fatal"]
+    }
+  }
 }

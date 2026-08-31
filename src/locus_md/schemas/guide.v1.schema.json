@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.locus-md.dev/guide.v1.schema.json",
+  "title": "locus-md Authoring Guide v1",
+  "type": "object",
+  "required": ["schema", "document"],
+  "properties": {
+    "schema": {"const": "locus-md.guide.v1"},
+    "document": {
+      "type": "object",
+      "required": ["id", "surface", "path", "description", "guidance", "sections"],
+      "properties": {
+        "id": {"type": "string"}, "surface": {"type": "string"}, "path": {"type": "string"},
+        "description": {"type": "string"}, "guidance": {"type": ["string", "null"]},
+        "sections": {"type": "array", "items": {"$ref": "#/$defs/section"}}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "section": {
+      "type": "object",
+      "required": ["id", "heading", "required", "guidance"],
+      "properties": {"id": {"type": "string"}, "heading": {"type": "string"}, "required": {"type": "boolean"}, "guidance": {"type": ["string", "null"]}},
+      "additionalProperties": false
+    }
+  }
+}

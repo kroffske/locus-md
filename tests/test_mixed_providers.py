@@ -48,52 +48,48 @@ def test_explicit_and_inherited_providers_validate_in_one_document(tmp_path: Pat
     }
     (tmp_path / "data" / "local.json").write_text(json.dumps(local), encoding="utf-8")
     (tmp_path / "data" / "linear.json").write_text(json.dumps(linear), encoding="utf-8")
-    (tmp_path / ".locus" / "config.ini").write_text(
-        """[locus.docs]
+    (tmp_path / ".locus" / "locus-md.toml").write_text(
+        """[locus-md]
 schema = 1
-surfaces = docs
+surfaces = ["docs"]
 strict = false
 
-[locus.docs.surface:docs]
-root = docs
-include = **/*.md
-index = index.md
+[locus-md.surface.docs]
+root = "docs"
+include = ["**/*.md"]
+index = ["index.md"]
 require_reachable = true
-default_provider = linear-tasks
-
-[locus.docs.provider:local-tasks]
-adapter = file-json
-path = data/local.json
-
-[locus.docs.provider:linear-tasks]
-adapter = file-json
-path = data/linear.json
-
-[locus.docs.contract:local]
-surface = docs
-path = plan.md
-block_kind = milestone
-block_id = local
-schema = task-table.v1
-mode = projection
-provider = local-tasks
-selector = {"milestone":"local"}
-renderer = task-table.v1
-
-[locus.docs.contract:linear]
-surface = docs
-path = plan.md
-block_kind = milestone
-block_id = linear
-schema = task-table.v1
-mode = projection
-provider = inherit
-selector = {"milestone":"remote"}
-renderer = task-table.v1
+default_provider = "linear-tasks"
+[locus-md.provider.local-tasks]
+adapter = "file-json"
+path = "data/local.json"
+[locus-md.provider.linear-tasks]
+adapter = "file-json"
+path = "data/linear.json"
+[locus-md.contract.local]
+surface = "docs"
+path = "plan.md"
+block_kind = "milestone"
+block_id = "local"
+schema = "task-table.v1"
+mode = "projection"
+provider = "local-tasks"
+selector = { milestone = "local" }
+renderer = "task-table.v1"
+[locus-md.contract.linear]
+surface = "docs"
+path = "plan.md"
+block_kind = "milestone"
+block_id = "linear"
+schema = "task-table.v1"
+mode = "projection"
+provider = "inherit"
+selector = { milestone = "remote" }
+renderer = "task-table.v1"
 """,
         encoding="utf-8",
     )
-    report = Engine(load_config(explicit=tmp_path / ".locus" / "config.ini")).verify(offline=True)
+    report = Engine(load_config(explicit=tmp_path / ".locus" / "locus-md.toml")).verify(offline=True)
     assert report.state == RunState.PASSED
     override = [finding for finding in report.findings if finding.code == "DOC-BLOCK-030"]
     assert len(override) == 1

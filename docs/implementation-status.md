@@ -6,19 +6,14 @@ type: note
 status: active
 owner: team:locus-md
 tags: [implementation, dogfood]
-updated: "2026-08-28T00:27:13Z"
-source_commit: "6ecd7cfe5fd1"
-update_event: "user_request"
-description: "Validated and connected to locus-md navigation and self-validation contracts."
 ---
 
 # Implementation status
 
-## Implemented self-validation path
-
-This table is materialized from `data/project-status.json`. The
-`.locus/config.ini` manifest binds the source to this block. Synchronization
-never rewrites the authored text outside the markers.
+This page is the repository's managed dogfood document. The provider reads
+`data/project-status.json`; the `[locus-md.contract.implementation-status]`
+binding in `.locus/locus-md.toml` owns only the marked table body. Authored
+prose outside the markers remains unchanged by synchronization.
 
 <!-- locus:milestone dogfood begin -->
 | Task | Title | Status |
@@ -32,11 +27,13 @@ never rewrites the authored text outside the markers.
 
 ## Deliberately deferred
 
-- GitHub and Linear packages.
+- Remote GitHub and Linear packages.
 - Remote writes and bidirectional authority.
 - SARIF and language-server integration.
-- Changed-files dependency closure.
-- Rule and renderer plugin groups as independently versioned SDKs.
-- Cross-process sandboxing of plugins.
+- A historical graph reconstruction beyond the current-config impact report.
+- Renderer plug-ins as an independently versioned SDK.
+- Cross-process sandboxing of plug-ins.
 
-The deferred items are not silently emulated. Unknown adapters and schemas are configuration errors; unavailable required providers produce an explicit `unverified` state.
+Read-only document rules use the `locus_md.rules` entry-point group. Unknown
+adapters and schemas are configuration errors. Unavailable required providers
+or rule evidence produce an explicit `unverified` state according to policy.

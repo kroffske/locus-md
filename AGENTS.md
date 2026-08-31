@@ -23,6 +23,7 @@ PATH="$PWD/.venv/bin:$PATH" make example
 .venv/bin/locus-md lint
 .venv/bin/locus-md verify --offline
 .venv/bin/locus-md sync --check --offline
+.venv/bin/locus-md impact --base main
 ```
 
 Install the global tool with `uv tool install --force .`. Build a wheel with
@@ -35,7 +36,7 @@ Locus project memory, run `locus init` to regenerate its private
 ## Change rules
 
 - `src/locus_md/` must not import a host application, remote tracker, or concrete task store.
-- locus-md reads only `[locus.docs*]` sections from a shared INI file.
+- locus-md reads only `.locus/locus-md.toml` and its `[locus-md]` namespace.
 - A managed-block update must preserve every byte outside its span.
 - Every new provider or contract failure requires a stable finding code and a test.
 - `dist/` contains a saved build snapshot. Treat it as current only after a new installation check.
@@ -62,7 +63,7 @@ Locus project memory, run `locus init` to regenerate its private
 | `examples/` | Self-contained workspaces for acceptance checks | tracked |
 | `schemas/` | JSON Schema for this repository's documentation | tracked |
 | `data/` | Normalized sources used by self-validation contracts | tracked |
-| `.locus/config.ini` | Tracked locus-md contract manifest | tracked |
+| `.locus/locus-md.toml` | Tracked locus-md contract manifest | tracked |
 | `.locus/docs.lock.json` | Reproducible evidence of the last materialization | tracked |
 | `.locus/soul.md` | Local product identity and durable direction | local |
 | `.tasks/` | Local task workspaces and evidence | local |

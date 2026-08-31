@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 from locus_md.contracts.task_table import TaskTableHandler
 from locus_md.models import ContractBinding, EntityRecord, ProviderSnapshot, Severity
 

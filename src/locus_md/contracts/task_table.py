@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from ..models import ContractBinding, DocumentRecord, EntityRecord, Finding, ManagedBlock, ProviderQuery, ProviderSnapshot, Severity
+from ..models import ContractBinding, DocumentRecord, EntityRecord, Finding, ManagedBlock, ProviderQuery, ProviderSnapshot
 from ..providers.common import matches_query
 
 _SEPARATOR_RE = re.compile(r"^:?-{3,}:?$")
